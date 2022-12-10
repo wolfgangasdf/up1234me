@@ -210,7 +210,12 @@
   text-align: center;
   top: 0;
   vertical-align: middle;
-  width: 200px;
+  /* width: 200px; */
+}
+
+.inputthings {
+  color: #000;
+  font-size: 30px;
 }
 
 .contentarea .boxarea {

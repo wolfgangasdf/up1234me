@@ -28,6 +28,17 @@ upload.modules.addmodule({
                 <input type="file" id="filepicker" class="hidden" />\
             </form>\
             </div>\
+            <div class="hidden" id="beforeupload">\
+                <h1 id="filename">filename</h1>\
+                <h1>Description (unencrypted):</h1>\
+                <input id="description" type="text" size="50" class="inputthings"/>\
+                <h1>Expiry in days:</h1>\
+                <input id="expirydays" type="number" list="expirydayslist" placeholder="30" step="10" min="1" max="100000" class="inputthings" />\
+                <datalist id="expirydayslist"><option>1</option><option>7</option><option selected>30</option><option>150</option><option>365</option></datalist>\
+                <h1>Viewer can delete:</h1>\
+                <input id="viewercandelete" type="checkbox" style="transform: scale(2.0)" checked />\
+                <br/><button id="uploadreally" type="button" style="transform: scale(2.0)">Upload!</button>\
+            </div>\
         </div>',
     init: function () {
         upload.modules.setdefault(this)
@@ -39,6 +50,7 @@ upload.modules.addmodule({
         $(document).on('click', this.triggerfocuspaste.bind(this))
         this.initpastecatcher()
         $(document).on('paste', this.pasted.bind(this))
+        $(document).on('click', '#uploadreally', this.douploadreally.bind(this))
     },
     dragleave: function (e) {
         e.preventDefault()
@@ -83,6 +95,9 @@ upload.modules.addmodule({
         this._.progress.type = view.find('#progresstype')
         this._.progress.amount = view.find('#progressamount')
         this._.progress.bg = view.find('#progressamountbg')
+        this._.beforeupload = view.find('#beforeupload')
+        this._.filename = view.find('#filename')
+        this._.description = view.find('#description')
         $('#footer').show()
     },
     initroute: function () {
@@ -121,12 +136,20 @@ upload.modules.addmodule({
         this._.progress.bg.css('width', percent + '%')
         this._.progress.amount.text(Math.floor(percent) + '%')
     },
+    // WL this is now "prepare for upload" - rename later! TODO
     doupload: function (blob) {
         this._.pastearea.addClass('hidden')
+
+        this._.beforeupload.removeClass('hidden')
+        this._.filename[0].innerHTML = blob.name
+        this._.description[0].value = blob.name
+        this._.blob = blob
+    },
+    douploadreally: function() {
         this._.progress.main.removeClass('hidden')
         this._.progress.type.text('Encrypting')
         this._.progress.bg.css('width', 0)
-        upload.updown.upload(blob, this.progress.bind(this), this.uploaded.bind(this))
+        upload.updown.upload(this._.blob, this.progress.bind(this), this.uploaded.bind(this))
     },
     closepaste: function() {
       this._.pastearea.removeClass('hidden')
