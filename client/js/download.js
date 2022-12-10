@@ -1,5 +1,3 @@
-upload.load.need('js/dragresize.js', function() { return window.dragresize })
-
 upload.modules.addmodule({
     name: 'download',
     delkeys: {},

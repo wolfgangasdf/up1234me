@@ -228,10 +228,6 @@
   font-size: 30px;
 }
 
-.dragresize.dragging {
-  cursor: nwse-resize;
-}
-
 .footer {
   bottom: 10px;
   margin: auto;
