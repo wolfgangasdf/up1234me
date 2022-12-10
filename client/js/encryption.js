@@ -99,7 +99,7 @@ function onprogress(id, progress) {
     })
 }
 
-onmessage = function (e) {
+self.onmessage = function (e) {
     var progress = onprogress.bind(undefined, e.data.id)
     sjcl.mode.ccm.listenProgress(progress)
     if (e.data.action == 'decrypt') {

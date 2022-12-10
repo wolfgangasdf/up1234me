@@ -93,6 +93,7 @@ func makeDelkey(ident string) string {
 // }
 
 func index(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("index: url=" + r.URL.Path)
 	if r.URL.Path == "/" {
 		http.ServeFile(w, r, filepath.Join(config.Path.Client, "upload.html"))
 	} else {
@@ -100,7 +101,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func download(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("download: url=" + r.URL.Path)
+	http.ServeFile(w, r, filepath.Join(config.Path.Client, "download.html"))
+}
+
 func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
+	fmt.Println("upload: url=" + r.Request.URL.Path)
 	if r.ContentLength > config.MaxFileSize {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "File size too large", Code: 1})
 		w.Write(msg)
@@ -167,6 +174,7 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 }
 
 func delfile(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("delete: url=" + r.URL.Path)
 	ident := r.FormValue("ident")
 	delkey := r.FormValue("delkey")
 
@@ -211,9 +219,17 @@ func main() {
 	// http.Handle("/i/", http.StripPrefix("/i", http.FileServer(http.Dir(config.Path.I))))
 	http.HandleFunc("/i/", indexi)
 	http.HandleFunc("/up", authenticator.Wrap(upload))
+	http.HandleFunc("/d/", download)
 	http.HandleFunc("/del", delfile)
 	// http.HandleFunc("/", authenticator.Wrap(index))
 	http.HandleFunc("/", index)
+
+	// // http.Handle("/i/", http.StripPrefix("/i", http.FileServer(http.Dir(config.Path.I))))
+	// http.HandleFunc("/i/", indexi)                     // encrypted storage /i
+	// http.HandleFunc("/up", authenticator.Wrap(upload)) // upload -> client/upload.html, auth
+	// http.HandleFunc("/del", delfile)                   // delete route
+	// // http.HandleFunc("/", authenticator.Wrap(index))
+	// http.HandleFunc("/", index) // everything under client
 
 	var wg sync.WaitGroup
 	wg.Add(2)

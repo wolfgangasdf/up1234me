@@ -1,3 +1,4 @@
+
 window.crypt = {}
 
 var crypto = window.crypto || window.msCrypto;
@@ -14,8 +15,7 @@ function getSeed() {
     return seed
 }
 
-export var worker = new Worker("./js/encryption.js")
-
+var worker = new Worker("../js/encryption.js")
 
 var promises = {}
 
@@ -54,7 +54,7 @@ crypt.encrypt = function (file, name) {
 
     var header = JSON.stringify({
         'mime': file.type,
-        'name': name ? name : (file.name ? file.name : ('Pasted ' + extension[0] + '.' + (extension[1] == 'plain' ? 'txt' : extension[1])))
+        'name': name ? name : file.name
     })
 
     var zero = new Uint8Array([0, 0]);
@@ -79,7 +79,6 @@ crypt.encrypt = function (file, name) {
     return promise
 }
 
-
 crypt.ident = function (seed) {
     var promise = getpromise()
 
@@ -91,7 +90,6 @@ crypt.ident = function (seed) {
 
     return promise
 }
-
 
 crypt.decrypt = function (file, seed) {
     var promise = getpromise()

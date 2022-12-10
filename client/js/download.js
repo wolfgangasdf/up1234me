@@ -1,10 +1,10 @@
-
-import "../deps/zepto.min.js"
+import "./loadencryption.js"
 import * as updown from "./updown.js"
-
-
+import "./shims.js"
+import "../deps/zepto.min.js"
 
 export var delkeys = {}
+
 var _ = {}
 function route(route, content) {
     if (content != 'noref') {
@@ -50,7 +50,7 @@ function initroute(content, contentroot) {
         _.prevbtn.show()
       }
     }
-    console.log(contentroot)
+    console.log("contentroot=", contentroot)
     delete _['text']
     _.filename.hide()
     _.title.text("Up1")
@@ -60,6 +60,7 @@ function initroute(content, contentroot) {
     _.content.main = _.content.loading = $('<h1>').prop('id', 'downloadprogress').addClass('centertext centerable').text('Downloading')
     _.detailsarea.empty().append(_.content.main)
     _.deletebtn.hide()
+
     updown.download(content, progress.bind(this), downloaded.bind(this))
 }
 function unrender() {
@@ -129,5 +130,18 @@ function progress(e) {
 (function () {
   var view = $('.modulecontent.modulearea')
   render(view)
-  initroute(view)
+
+  // this works
+  // var worker = new Worker("../js/encryption.js")
+  // worker.onmessage = function (e) {
+  //   console.log("eee=", e)
+  // }
+  // worker.postMessage({
+  //     'seed': 1209482395,
+  //     'action': 'ident',
+  //     'id': 237482634
+  // })
+  console.log("location: " + window.location.hash)
+  initroute(window.location.hash.substring(1))
+
 }())

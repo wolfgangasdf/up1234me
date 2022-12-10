@@ -2,7 +2,6 @@
 import "./loadencryption.js"
 import * as config from "../config.js"
 import * as updown from "./updown.js"
-import * as download from "./download.js"
 import "./shims.js"
 import "../deps/zepto.min.js"
 
@@ -49,14 +48,6 @@ function pickerchange(e) {
         doupload(e.target.files[0])
         $(e.target).parents('form')[0].reset()
     }
-}
-
-// TODO
-function route(route, content) {
-    if (content && content != 'noref') {
-        return download
-    }
-    return this
 }
 
 function render(view) {
@@ -139,22 +130,23 @@ function dopasteupload(data) {
     _.view.find('.viewswitcher').hide()
 }
 
-// TODO fix route shit.
 function uploaded(data, response) {
-    download.delkeys[data.ident] = response.delkey
+    // download.delkeys[data.ident] = response.delkey
 
-    try {
-        localStorage.setItem('delete-' + data.ident, response.delkey)
-    } catch (e) {
-        console.log(e)
-    }
+    // try {
+    //     localStorage.setItem('delete-' + data.ident, response.delkey)
+    // } catch (e) {
+    //     console.log(e)
+    // }
 
-    if (window.location.hash == '#noref') {
-        history.replaceState(undefined, undefined, '#' + data.seed)
-        route.setroute(download, undefined, data.seed)
-    } else {
-        window.location = '#' + data.seed
-    }
+    // TODO
+    // if (window.location.hash == '#noref') {
+    //     history.replaceState(undefined, undefined, '#' + data.seed)
+    //     // route.setroute(download, undefined, data.seed)
+    // } else {
+    // }
+    window.location = 'd/#' + data.seed
+
 }
 function pasted(e) {
     console.log("pasted!!!")

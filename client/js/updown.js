@@ -1,8 +1,8 @@
 import * as config from "../config.js"
-import "./loadencryption.js"
 
 var cached = {}
 var cached_seed = {}
+var requestframe = {}
 
 function init() {
     // We do this to try to hide the fragment from the referral in IE
@@ -14,7 +14,7 @@ function init() {
 function downloadfromident(seed, progress, done, ident) {
     var xhr = new requestframe.contentWindow.XMLHttpRequest()
     xhr.onload = downloaded.bind(this, seed, progress, done)
-    xhr.open('GET', (upload.config.server ? upload.config.server : '') + 'i/' + ident.ident)
+    xhr.open('GET', (config.server ? config.server : '') + '/i/' + ident.ident)
     xhr.responseType = 'blob'
     xhr.onerror = onerror.bind(this, progress)
     xhr.addEventListener('progress', progress, false)
@@ -70,6 +70,9 @@ export function download(seed, progress, done) {
     }
 }
 export function upload(blob, progress, done) {
-    crypt.encrypt(blob).done(encrypted.bind(this, progress, done)).done(cacheresult.bind(this)).progress(progress)
+  crypt.encrypt(blob).done(encrypted.bind(this, progress, done)).done(cacheresult.bind(this)).progress(progress)
 }
 
+(function () {
+  init()
+}())
