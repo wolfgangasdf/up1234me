@@ -94,7 +94,7 @@ func makeDelkey(ident string) string {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		http.ServeFile(w, r, filepath.Join(config.Path.Client, "index.html"))
+		http.ServeFile(w, r, filepath.Join(config.Path.Client, "upload.html"))
 	} else {
 		http.ServeFile(w, r, filepath.Join(config.Path.Client, r.URL.Path[1:]))
 	}

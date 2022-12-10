@@ -1,3 +1,5 @@
+dontrun
+
 (function(window) {
   "use strict";
   window.upload = {}

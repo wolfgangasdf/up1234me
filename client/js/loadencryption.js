@@ -14,7 +14,7 @@ function getSeed() {
     return seed
 }
 
-var worker = new Worker("./js/encryption.js")
+export var worker = new Worker("./js/encryption.js")
 
 
 var promises = {}

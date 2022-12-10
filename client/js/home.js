@@ -1,3 +1,7 @@
+window.onload = function() {
+
+    import "js/loadencryption.js"
+
 upload.load.need('js/download.js', function() { return upload.download })
 upload.load.need('js/loadencryption.js', function() { return window.crypt })
 upload.load.need('js/updown.js', function() { return upload.updown })
@@ -5,41 +9,7 @@ upload.load.need('js/updown.js', function() { return upload.updown })
 upload.modules.addmodule({
     name: 'home',
     // Dear santa, https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/template_strings
-    template: '\
-        <div class="topbar">\
-        <div class="viewswitcher">\
-        <p class="btn">Uploads require authentication</p>.\
-        </div>\
-        </div>\
-        <div class="contentarea" id="uploadview">\
-            <div class="centerview">\
-            <div id="pastearea" class="boxarea">\
-                <h1>Upload</h1>\
-            </div>\
-            <div class="hidden boxarea" id="uploadprogress">\
-                <h1 id="progresstype"></h1>\
-                <h1 id="progressamount"></h1>\
-                <div id="progressamountbg"></div>\
-            </div>\
-            <div class="hidden" id="uploadfinish">\
-                <h1><a href="" id="finallink">Link</a></h1>\
-            </div>\
-            <form>\
-                <input type="file" id="filepicker" class="hidden" />\
-            </form>\
-            </div>\
-            <div class="hidden" id="beforeupload">\
-                <h1 id="filename">filename</h1>\
-                <h1>Description (unencrypted):</h1>\
-                <input id="description" type="text" size="50" class="inputthings"/>\
-                <h1>Expiry in days:</h1>\
-                <input id="expirydays" type="number" list="expirydayslist" placeholder="30" step="10" min="1" max="100000" class="inputthings" />\
-                <datalist id="expirydayslist"><option>1</option><option>7</option><option selected>30</option><option>150</option><option>365</option></datalist>\
-                <h1>Viewer can delete:</h1>\
-                <input id="viewercandelete" type="checkbox" style="transform: scale(2.0)" checked />\
-                <br/><button id="uploadreally" type="button" style="transform: scale(2.0)">Upload!</button>\
-            </div>\
-        </div>',
+
     init: function () {
         upload.modules.setdefault(this)
         $(document).on('change', '#filepicker', this.pickerchange.bind(this))
