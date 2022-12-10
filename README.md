@@ -7,33 +7,7 @@ Changes compared to Up1:
 * allow multiple-file upload which are zipped.
 
 ===
-
-Up1 is a simple host that client-side encrypts images, text, and other data, and stores them, with the server knowing nothing about the contents.
-It has the ability to view images, text with syntax highlighting, short videos, and arbitrary binaries as downloadables.
-
-Public Server
----
-There was a public, free to use server at https://up1.ca.  
-This demo instance is no longer available or being maintained. However, there are several public hosts which use up1. An online search should turn up some results.
-
-#### Client Utilities:
-* [ShareX](https://github.com/ShareX/ShareX), a popular screenshot and image uploader, now merged with Up1 support
-* [upclient](https://github.com/Upload/upclient), a command-line tool for uploading to Up1 servers
-
-Quick start
----
-To install and run the server with default settings:
-
-    apt-get install nodejs
-    git clone https://github.com/Upload/Up1
-    cd Up1
-    cp server/server.conf.example server/server.conf
-    cp client/config.js.example client/config.js
-    cd server
-    npm install
-    node server.js
-
-Server configuration is done through the [`server.conf`](https://github.com/Upload/Up1/server.conf.example) file. For a quick start, simply move `server.conf.example` to `server.conf`.
+For a quick start, simply move `server.conf.example` to `server.conf`.
 
 `listen` is an `address:port`-formatted string, where either one are optional. Some examples include `":9000"` to listen on any interface, port 9000; `"127.0.0.1"` to listen on localhost port 80; `"1.1.1.1:8080"` to listen on 1.1.1.1 port 8080; or even `""` to listen on any interface, port 80.
 
@@ -45,20 +19,10 @@ Server configuration is done through the [`server.conf`](https://github.com/Uplo
 
 There are three additional sections in the configuration file: `http`, `https` and `cloudflare-cache-invalidate`. The first two are fairly self-explanitory (and at least one must be enabled).
 
-`cloudflare-cache-invalidate` is disabled by default and only useful if you choose to run the Up1 server behind Cloudflare. When this section is enabled, it ensures that when an upload is deleted, Cloudflare doesn't hold on to copies of the upload on its edge servers by sending an API call to invalidate it.
-
 For the web application configuration, a [`config.js.example`](https://github.com/Upload/Up1/config.js.example) file is provided. Make sure the `api_key` here matches the one in `server.conf`.
 
-External Tools
----
 
-Currently, there are two external programs adapted to work with Up1: [ShareX](https://github.com/ShareX/ShareX) ([relevant code](https://github.com/ShareX/ShareX/pull/751)), and [upclient](https://github.com/Upload/upclient).
-
-ShareX is a popular screenshot tool which supports tons of upload services, not just for images but also for text, video, documents, etc. ShareX includes a service which can send files to any Up1 server. It uses .NET BouncyCastle for the crypto.
-
-Upclient is a CLI tool which can send files or data to Up1 servers either via unix pipe (`ps aux | up`), or via argument (`up image.png`), and returns a URL to the uploaded file on stdout. It runs on nodejs and uses SJCL for the crypto.
-
-How it works
+How it works (from Up1)
 ---
 
 Before an image is uploaded, a "seed" is generated. This seed can be of any length (because really, the server will never be able to tell), but has a length of 25 characters by default. The seed is then run through SHA512, giving the AES key in bytes 0-256, the CCM IV in bytes 256-384, and the server's file identifier in bytes 384-512. Using this output, the image data is then encrypted using said AES key and IV using SJCL's AES-CCM methods, and sent to the server with an identifier. Within the encryption, there is also a prepended JSON object that contains metadata (currently just the filename and mime-type). The (decrypted) blob format starts with 2 bytes denoting the JSON character length, the JSON data itself, and then the file data at the end.
@@ -72,7 +36,7 @@ The browser-side is written in plain Javascript using SJCL for the AES-CCM encry
 
 Additionally, the repository copy of SJCL comes from the source at https://github.com/bitwiseshiftleft/sjcl, commit `fb1ba931a46d41a7c238717492b66201b2995840` (Version 1.0.3), built with the command line `./configure --without-all --with-aes --with-sha512 --with-codecBytes --with-random --with-codecBase64 --with-ccm`, and compressed using Closure Compiler. If all goes well, a self-built copy should match up byte-for-byte to the contents of `static/deps/sjcl.min.js`.
 
-The server-side is written in Node, although we also have a Go server which uses no dependencies outside of the standard library. The only cryptography it uses is for generating deletion keys, using HMAC and SHA256 in the built-in `crypto/hmac` and `crypto/sha256` packages, respectively.
+The server-side is a Go server which uses no dependencies outside of the standard library. The only cryptography it uses is for generating deletion keys, using HMAC and SHA256 in the built-in `crypto/hmac` and `crypto/sha256` packages, respectively.
 
 Caveats
 ---
@@ -89,23 +53,8 @@ Caveats
   1. Put `rel="noreferrer"` into any `<a>` links that are directed at the Up1 server.
   2. If you don't have control over the link attributes, you can use a referrer breaker such as https://anon.click/ or https://href.li/, amongst many.
 
-Contributing
----
-Any contributions, whether to our existing code or as separate applications, are very welcome!
-
-We don't ask for any CLAs - you don't have to give up copyright on your code - however we prefer that you contribute under the MIT license, just for consistency.
-
-If you find serious security issues, please email us at `security@up1.ca`.
-
-Some of us idle on `irc.freenode.net` in the `#upload` channel, if you would like to chat!
-
-Thank you for you contributions!
 
 License
 ---
 
-The Up1 server and browser code are both licensed under MIT.
-
-ShareX's base code is licensed under GPLv2, however the modifications (namely, the C# encryption code) is licensed under MIT.
-
-Upclient is licensed fully under MIT.
+Like Up1: MIT.
