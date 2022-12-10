@@ -1,6 +1,11 @@
-![Logo](https://avatars2.githubusercontent.com/u/12774718?s=150)
+Up1234me: A Client-side Encrypted File Host based on [Up1](https://github.com/Upload/Up1)
 
-Up1: A Client-side Encrypted Image Host
+===
+Changes compared to Up1:
+* for files that are downloaded by the client, not shown in browser
+* http basic authentication for upload, for a single admin user
+* allow multiple-file upload which are zipped.
+
 ===
 
 Up1 is a simple host that client-side encrypts images, text, and other data, and stores them, with the server knowing nothing about the contents.
