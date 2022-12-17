@@ -8,12 +8,15 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"sync"
+	"time"
 
 	auth "github.com/abbot/go-http-auth"
 )
@@ -36,6 +39,20 @@ type Config struct {
 }
 
 var config Config
+
+type Metadata struct {
+	Description     string
+	Expirydays      int
+	Viewercandelete bool
+	Downloadcount   int
+}
+
+type FileInfo struct {
+	Description     string
+	DaysUntiExpiry  int
+	ViewerCanDelete bool
+	DownloadCount   int
+}
 
 type ErrorMessage struct {
 	Error string `json:"error"`
@@ -146,6 +163,36 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		return
 	}
 
+	// metadata unencrypted
+	description := r.FormValue("description")
+	expirydays, err := strconv.Atoi(r.FormValue("expirydays"))
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Expirydays not a number.", Code: 20})
+		w.Write(msg)
+		return
+	}
+	viewercandelete, err := strconv.ParseBool(r.FormValue("viewercandelete"))
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Viewercandelete not a bool.", Code: 21})
+		w.Write(msg)
+		return
+	}
+	fmt.Println("description: " + description + " expirydays=" + strconv.Itoa(expirydays) + " viewercandelete=" + strconv.FormatBool(viewercandelete))
+	metaPath := identPath + ".json"
+	metaContent, err := json.Marshal(Metadata{Description: description, Expirydays: expirydays, Viewercandelete: viewercandelete})
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Metadata marshalling error:" + err.Error(), Code: 22})
+		w.Write(msg)
+		return
+	}
+	fmt.Println("writing metadata file... path: " + metaPath)
+	err = ioutil.WriteFile(metaPath, metaContent, 0644)
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Error writing metadata file:" + err.Error(), Code: 23})
+		w.Write(msg)
+		return
+	}
+
 	out, err := os.Create(identPath)
 	if err != nil {
 		msg, _ := json.Marshal(&ErrorMessage{Error: err.Error(), Code: 6})
@@ -198,12 +245,37 @@ func delfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	os.Remove(identPath)
-	http.Redirect(w, r, "/", 301)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
 func indexi(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("indexi: " + r.URL.Path)
-	http.ServeFile(w, r, filepath.Join(config.Path.I, r.URL.Path[2:]))
+	identPath := filepath.Join(config.Path.I, r.URL.Path[2:])
+	// read metadata
+	file, err := ioutil.ReadFile(identPath + ".json")
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Error reading metadata file", Code: 30})
+		w.Write(msg)
+		return
+	}
+	md := Metadata{}
+	err = json.Unmarshal([]byte(file), &md)
+	if err != nil {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Error decoding metadata", Code: 31})
+		w.Write(msg)
+		return
+	}
+	fi := FileInfo{Description: md.Description, DaysUntiExpiry: -1, ViewerCanDelete: md.Viewercandelete, DownloadCount: md.Downloadcount}
+	if ifile, err := os.Stat(identPath); err != nil {
+		fi.DaysUntiExpiry = int(time.Since(ifile.ModTime().AddDate(0, 0, md.Expirydays)).Hours() / 24)
+	}
+	jsonstring, err := json.Marshal(fi)
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Add("Fileinfo", string(jsonstring))
+
+	http.ServeFile(w, r, identPath)
 }
 
 func main() {

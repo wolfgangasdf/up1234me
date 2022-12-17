@@ -16,6 +16,11 @@ function render(view) {
     _ = {}
     _.view = view
     _.detailsarea = view.find('#downloaddetails')
+    _.loading = view.find('#downloadprogress')
+    _.description = view.find('#description')
+    _.daysuntilexpiry = view.find('#daysuntilexpiry')
+    _.viewercandelete = view.find('#viewercandelete')
+    _.downloadcount = view.find('#downloadcount')
     _.filename = view.find('#downloaded_filename')
     _.btns = view.find('#btnarea')
     _.deletebtn = view.find('#deletebtn')
@@ -56,9 +61,6 @@ function initroute(content, contentroot) {
     _.title.text("Up1")
     _.btns.hide()
     _.newupload.hide()
-    _.content = {}
-    _.content.main = _.content.loading = $('<h1>').prop('id', 'downloadprogress').addClass('centertext centerable').text('Downloading')
-    _.detailsarea.empty().append(_.content.main)
     _.deletebtn.hide()
 
     updown.download(content, progress.bind(this), downloaded.bind(this))
@@ -68,9 +70,14 @@ function unrender() {
     delete this['_']
 }
 
-function downloaded(data) {
+function downloaded(data, fileinfo) { // TODO file info
     _.filename.text(data.header.name)
     _.title.text(data.header.name + ' - Up1')
+    const fi = JSON.parse(fileinfo);
+    _.description.text("Description: " + fi.Description)
+    _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntiExpiry)
+    _.viewercandelete.text("Viewer can delete: " + fi.ViewerCanDelete)
+    _.downloadcount.text("Downloads: " + fi.DownloadCount)
 
     var stored = delkeys[data.ident]
 
@@ -105,15 +112,14 @@ function downloaded(data) {
 
     _.viewbtn.show()
 
-    $('<div>').addClass('preview').addClass('downloadexplain centerable centertext').text("Click the Download link in the bottom-left to download this file.").appendTo(_.detailsarea)
     _.filename.show()
     _.btns.show()
 }
 function progress(e) {
     if (e == 'decrypting') {
-        _.content.loading.text('Decrypting')
+        _.loading.text('Decrypting')
     } else if (e == 'error') {
-      _.content.loading.text('File not found or corrupt')
+      _.loading.text('File not found or corrupt')
       _.newupload.show()
     } else {
         var text = ''
@@ -123,7 +129,7 @@ function progress(e) {
             text = 'Decrypting'
         }
         var percent = (e.loaded / e.total) * 100
-        _.content.loading.text(text + ' ' + Math.floor(percent) + '%')
+        _.loading.text(text + ' ' + Math.floor(percent) + '%')
     }
 }
 

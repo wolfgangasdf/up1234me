@@ -30,15 +30,26 @@ function downloaded(seed, progress, done, response) {
       onerror(progress)
     } else {
       cache(seed, response.target.response)
-      progress('decrypting')
-      crypt.decrypt(response.target.response, seed).done(done)
+      var fi = response.target.getResponseHeader("Fileinfo")
+      if (!fi) {
+        console.log("error reading file info")
+        onerror(progress)
+      } else {
+        progress('decrypting')
+        crypt.decrypt(response.target.response, seed).done(function (res) {
+          done(res, fi) // why doesn't it work with .done(done(fi)) ?
+        })
+      }
     }
 }
-function uploadencrypted(progress, done, data) {
+function uploadencrypted(metadata, progress, done, data) {
     var formdata = new FormData()
     formdata.append('api_key', config.api_key)
     formdata.append('ident', data.ident)
     formdata.append('file', data.encrypted)
+    formdata.append('description', metadata.description) // TODO in json?
+    formdata.append('expirydays', metadata.expirydays)
+    formdata.append('viewercandelete', metadata.viewercandelete)
     $.ajax({
         url: (config.server ? config.server : '') + 'up',
         data: formdata,
@@ -54,7 +65,7 @@ function uploadencrypted(progress, done, data) {
         type: 'POST'
     }).done(done.bind(undefined, data))
 }
-function cache(seed, data) {
+function cache(seed, data) { // TODO remove? But it does download and decrypt immediately...
   cached = data
   cached_seed = seed
 }
@@ -69,8 +80,8 @@ export function download(seed, progress, done) {
       crypt.ident(seed).done(downloadfromident.bind(this, seed, progress, done))
     }
 }
-export function upload(blob, progress, done) {
-  crypt.encrypt(blob).done(uploadencrypted.bind(this, progress, done)).done(cacheresult.bind(this)).progress(progress)
+export function upload(blob, metadata, progress, done) {
+  crypt.encrypt(blob).done(uploadencrypted.bind(this, metadata, progress, done)).done(cacheresult.bind(this)).progress(progress)
 }
 
 (function () {

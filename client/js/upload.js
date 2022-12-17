@@ -62,6 +62,8 @@ function render(view) {
     _.beforeupload = view.find('#beforeupload')
     _.filename = view.find('#filename')
     _.description = view.find('#description')
+    _.expirydays = view.find('#expirydays')
+    _.viewercandelete = view.find('#viewercandelete')
     $('#footer').show()
 }
 
@@ -104,20 +106,27 @@ function progress(e) {
     _.progress.bg.css('width', percent + '%')
     _.progress.amount.text(Math.floor(percent) + '%')
 }
-// WL this is now "prepare for upload" - rename later! TODO
+// TODO this is called if file dropped and prepares upload. change for multiple files!
 function doupload(blob) {
     _.pastearea.addClass('hidden')
 
     _.beforeupload.removeClass('hidden')
-    _.filename[0].innerHTML = blob.name
-    _.description[0].value = blob.name
+    _.filename.text(blob.name)
+    _.description.val(blob.name) // TODO multiple files
     _.blob = blob
 }
+
+// called if "upload" botton clicked
 function douploadreally() {
     _.progress.main.removeClass('hidden')
     _.progress.type.text('Encrypting')
     _.progress.bg.css('width', 0)
-    updown.upload(_.blob, progress.bind(this), uploaded.bind(this))
+    _.metadata = {
+        description: _.description.val(),
+        expirydays: _.expirydays.val() == '' ? _.expirydays.attr('placeholder') : _.expirydays.val(),
+        viewercandelete: _.viewercandelete.attr("checked") || false
+    }
+    updown.upload(_.blob, _.metadata, progress.bind(this), uploaded.bind(this))
 }
 function closepaste() {
   _.pastearea.removeClass('hidden')
@@ -131,6 +140,13 @@ function dopasteupload(data) {
 }
 
 function uploaded(data, response) {
+    console.log("uploaded: response=", response, " data=", data)
+    if (response.code) {
+        _.progress.type.text("Error")
+        _.progress.amount.text(response.error)
+    } else {
+        window.location = 'd/#' + data.seed
+    }
     // download.delkeys[data.ident] = response.delkey
 
     // try {
@@ -145,7 +161,6 @@ function uploaded(data, response) {
     //     // route.setroute(download, undefined, data.seed)
     // } else {
     // }
-    window.location = 'd/#' + data.seed
 
 }
 function pasted(e) {
