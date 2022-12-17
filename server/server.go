@@ -1,14 +1,10 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +20,6 @@ import (
 type Config struct {
 	Listen      string `json:"listen"`
 	ApiKey      string `json:"api_key"`
-	DeleteKey   string `json:"delete_key"`
 	MaxFileSize int64  `json:"maximum_file_size"`
 
 	Path struct {
@@ -33,8 +28,7 @@ type Config struct {
 	} `json:"path"`
 
 	Http struct {
-		Enabled bool   `json:"enabled"`
-		Listen  string `json:"listen"`
+		Listen string `json:"listen"`
 	} `json:"http"`
 }
 
@@ -60,7 +54,6 @@ type ErrorMessage struct {
 }
 
 type SuccessMessage struct {
-	Delkey string `json:"delkey"`
 }
 
 func readConfig(name string) Config {
@@ -75,14 +68,8 @@ func readConfig(name string) Config {
 }
 
 func validateConfig(config Config) {
-	if !config.Http.Enabled {
-		log.Fatal("Http must be enabled!")
-	}
 	if len(config.ApiKey) == 0 {
 		log.Fatal("A static key must be defined in the configuration!")
-	}
-	if len(config.DeleteKey) == 0 {
-		log.Fatal("A static delete key must be defined in the configuration!")
 	}
 	if len(config.Path.I) == 0 {
 		config.Path.I = "../i"
@@ -91,23 +78,6 @@ func validateConfig(config Config) {
 		config.Path.Client = "../client"
 	}
 }
-
-func makeDelkey(ident string) string {
-	key := []byte(config.DeleteKey)
-	h := hmac.New(sha256.New, key)
-	h.Write([]byte(ident))
-	return hex.EncodeToString(h.Sum(nil))
-}
-
-// func index(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
-// 	fmt.Println("index: " + r.Username + " url=" + r.Request.URL.Path)
-// 	// http.ServeFile(w, &r.Request, filepath.Join(config.Path.Client, "index.html"))
-// 	if r.URL.Path == "/" {
-// 		http.ServeFile(w, &r.Request, filepath.Join(config.Path.Client, "index.html"))
-// 	} else {
-// 		http.ServeFile(w, &r.Request, filepath.Join(config.Path.Client, r.URL.Path[1:]))
-// 	}
-// }
 
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("index: url=" + r.URL.Path)
@@ -121,6 +91,19 @@ func index(w http.ResponseWriter, r *http.Request) {
 func download(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("download: url=" + r.URL.Path)
 	http.ServeFile(w, r, filepath.Join(config.Path.Client, "download.html"))
+}
+
+func savaMetadata(identPath string, md Metadata) error {
+	metaPath := identPath + ".json"
+	metaContent, err := json.Marshal(md)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(metaPath, metaContent, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
@@ -178,20 +161,7 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		return
 	}
 	fmt.Println("description: " + description + " expirydays=" + strconv.Itoa(expirydays) + " viewercandelete=" + strconv.FormatBool(viewercandelete))
-	metaPath := identPath + ".json"
-	metaContent, err := json.Marshal(Metadata{Description: description, Expirydays: expirydays, Viewercandelete: viewercandelete})
-	if err != nil {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "Metadata marshalling error:" + err.Error(), Code: 22})
-		w.Write(msg)
-		return
-	}
-	fmt.Println("writing metadata file... path: " + metaPath)
-	err = ioutil.WriteFile(metaPath, metaContent, 0644)
-	if err != nil {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "Error writing metadata file:" + err.Error(), Code: 23})
-		w.Write(msg)
-		return
-	}
+	savaMetadata(identPath, Metadata{Description: description, Expirydays: expirydays, Viewercandelete: viewercandelete})
 
 	out, err := os.Create(identPath)
 	if err != nil {
@@ -210,9 +180,7 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		return
 	}
 
-	delkey := makeDelkey(ident)
-
-	result, err := json.Marshal(&SuccessMessage{Delkey: delkey})
+	result, err := json.Marshal(&SuccessMessage{})
 	if err != nil {
 		msg, _ := json.Marshal(&ErrorMessage{Error: err.Error(), Code: 8})
 		w.Write(msg)
@@ -223,7 +191,6 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 func delfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("delete: url=" + r.URL.Path)
 	ident := r.FormValue("ident")
-	delkey := r.FormValue("delkey")
 
 	if len(ident) != 22 {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "Ident filename length is incorrect", Code: 3})
@@ -238,36 +205,46 @@ func delfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if delkey != makeDelkey(ident) {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "Incorrect delete key", Code: 10})
+	md, _ := loadMetadata(identPath)
+	if !md.Viewercandelete {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Viewer can't delete.", Code: 91})
 		w.Write(msg)
 		return
 	}
 
-	os.Remove(identPath)
+	if err := os.Remove(identPath); err != nil {
+		panic(err)
+	}
+	if err := os.Remove(identPath + ".json"); err != nil {
+		panic(err)
+	}
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+func loadMetadata(identPath string) (Metadata, error) {
+	file, err := os.ReadFile(identPath + ".json")
+	md := Metadata{}
+	if err != nil {
+		return md, err
+	}
+	err = json.Unmarshal([]byte(file), &md)
+	return md, err
 }
 
 func indexi(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("indexi: " + r.URL.Path)
 	identPath := filepath.Join(config.Path.I, r.URL.Path[2:])
-	// read metadata
-	file, err := ioutil.ReadFile(identPath + ".json")
+	md, err := loadMetadata(identPath)
 	if err != nil {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "Error reading metadata file", Code: 30})
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Error loading metadata", Code: 30})
 		w.Write(msg)
-		return
+		return // TODO test this, does client receive error?
 	}
-	md := Metadata{}
-	err = json.Unmarshal([]byte(file), &md)
-	if err != nil {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "Error decoding metadata", Code: 31})
-		w.Write(msg)
-		return
-	}
+	md.Downloadcount++
+	savaMetadata(identPath, md)
 	fi := FileInfo{Description: md.Description, DaysUntiExpiry: -1, ViewerCanDelete: md.Viewercandelete, DownloadCount: md.Downloadcount}
-	if ifile, err := os.Stat(identPath); err != nil {
-		fi.DaysUntiExpiry = int(time.Since(ifile.ModTime().AddDate(0, 0, md.Expirydays)).Hours() / 24)
+	if ifile, err := os.Stat(identPath); err == nil {
+		fi.DaysUntiExpiry = md.Expirydays - int(time.Since(ifile.ModTime()).Hours()/24)
 	}
 	jsonstring, err := json.Marshal(fi)
 	if err != nil {
@@ -288,10 +265,10 @@ func main() {
 	// http basic auth
 	authenticator := auth.NewBasicAuthenticator("up1234me", auth.HtpasswdFileProvider("server.htpasswd"))
 
-	http.HandleFunc("/i/", indexi) // serve encrypted files and unencrypted metadata
-	http.HandleFunc("/up", authenticator.Wrap(upload))
+	http.HandleFunc("/i/", indexi)                     // serve encrypted files and unencrypted metadata
+	http.HandleFunc("/up", authenticator.Wrap(upload)) // upload receiver
 	http.HandleFunc("/del", delfile)
-	http.HandleFunc("/d/", download) // download screen
+	http.HandleFunc("/d/", download) // download.html
 	http.HandleFunc("/", index)      // serve all other files
 
 	var wg sync.WaitGroup
@@ -299,10 +276,8 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		if config.Http.Enabled {
-			log.Printf("Starting HTTP server on %s\n", config.Http.Listen)
-			log.Println(http.ListenAndServe(config.Http.Listen, nil))
-		}
+		log.Printf("Starting HTTP server on %s\n", config.Http.Listen)
+		log.Println(http.ListenAndServe(config.Http.Listen, nil))
 	}()
 
 	wg.Wait()

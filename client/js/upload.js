@@ -147,14 +147,6 @@ function uploaded(data, response) {
     } else {
         window.location = 'd/#' + data.seed
     }
-    // download.delkeys[data.ident] = response.delkey
-
-    // try {
-    //     localStorage.setItem('delete-' + data.ident, response.delkey)
-    // } catch (e) {
-    //     console.log(e)
-    // }
-
     // TODO
     // if (window.location.hash == '#noref') {
     //     history.replaceState(undefined, undefined, '#' + data.seed)

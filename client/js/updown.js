@@ -14,7 +14,7 @@ function init() {
 function downloadfromident(seed, progress, done, ident) {
     var xhr = new requestframe.contentWindow.XMLHttpRequest()
     xhr.onload = downloaded.bind(this, seed, progress, done)
-    xhr.open('GET', (config.server ? config.server : '') + '/i/' + ident.ident)
+    xhr.open('GET', '/i/' + ident.ident)
     xhr.responseType = 'blob'
     xhr.onerror = onerror.bind(this, progress)
     xhr.addEventListener('progress', progress, false)
@@ -36,9 +36,7 @@ function downloaded(seed, progress, done, response) {
         onerror(progress)
       } else {
         progress('decrypting')
-        crypt.decrypt(response.target.response, seed).done(function (res) {
-          done(res, fi) // why doesn't it work with .done(done(fi)) ?
-        })
+        crypt.decrypt(response.target.response, seed).done(done.bind(this, fi))
       }
     }
 }
@@ -51,7 +49,7 @@ function uploadencrypted(metadata, progress, done, data) {
     formdata.append('expirydays', metadata.expirydays)
     formdata.append('viewercandelete', metadata.viewercandelete)
     $.ajax({
-        url: (config.server ? config.server : '') + 'up',
+        url: 'up',
         data: formdata,
         cache: false,
         processData: false,

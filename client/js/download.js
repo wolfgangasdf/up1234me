@@ -3,7 +3,6 @@ import * as updown from "./updown.js"
 import "./shims.js"
 import "../deps/zepto.min.js"
 
-export var delkeys = {}
 
 var _ = {}
 function route(route, content) {
@@ -70,7 +69,7 @@ function unrender() {
     delete this['_']
 }
 
-function downloaded(data, fileinfo) { // TODO file info
+function downloaded(fileinfo, data) { 
     _.filename.text(data.header.name)
     _.title.text(data.header.name + ' - Up1')
     const fi = JSON.parse(fileinfo);
@@ -79,18 +78,8 @@ function downloaded(data, fileinfo) { // TODO file info
     _.viewercandelete.text("Viewer can delete: " + fi.ViewerCanDelete)
     _.downloadcount.text("Downloads: " + fi.DownloadCount)
 
-    var stored = delkeys[data.ident]
-
-    if (!stored) {
-        try {
-            stored = localStorage.getItem('delete-' + data.ident)
-        } catch (e) {
-            console.log(e)
-        }
-    }
-
-    if (stored && !isiframed()) {
-        _.deletebtn.show().prop('href', (upload.config.server ? upload.config.server : '') + 'del?delkey=' + stored + '&ident=' + data.ident)
+    if (fi.ViewerCanDelete) {
+        _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
     }
 
     _.newupload.show()
@@ -137,16 +126,6 @@ function progress(e) {
   var view = $('.modulecontent.modulearea')
   render(view)
 
-  // this works
-  // var worker = new Worker("../js/encryption.js")
-  // worker.onmessage = function (e) {
-  //   console.log("eee=", e)
-  // }
-  // worker.postMessage({
-  //     'seed': 1209482395,
-  //     'action': 'ident',
-  //     'id': 237482634
-  // })
   console.log("location: " + window.location.hash)
   initroute(window.location.hash.substring(1))
 
