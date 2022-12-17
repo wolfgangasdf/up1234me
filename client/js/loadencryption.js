@@ -50,8 +50,6 @@ function getpromise() {
 
 crypt.encrypt = function (file, name) {
 
-    var extension = file.type.split('/')
-
     var header = JSON.stringify({
         'mime': file.type,
         'name': name ? name : file.name

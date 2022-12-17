@@ -4,8 +4,13 @@ import * as config from "../config.js"
 import * as updown from "./updown.js"
 import "./shims.js"
 import "../deps/zepto.min.js"
+import * as cz from '../deps/client-zip.js';
+
 
 var _ = {}
+_.blobs = []
+_.filenames = []
+_.filecount = 0
 
 function init() {
     $(document).on('change', '#filepicker', pickerchange.bind(this))
@@ -60,7 +65,7 @@ function render(view) {
     _.progress.amount = view.find('#progressamount')
     _.progress.bg = view.find('#progressamountbg')
     _.beforeupload = view.find('#beforeupload')
-    _.filename = view.find('#filename')
+    _.filenames = view.find('#filenames')
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
     _.viewercandelete = view.find('#viewercandelete')
@@ -106,14 +111,15 @@ function progress(e) {
     _.progress.bg.css('width', percent + '%')
     _.progress.amount.text(Math.floor(percent) + '%')
 }
-// TODO this is called if file dropped and prepares upload. change for multiple files!
+// this is called if file dropped and prepares upload.
 function doupload(blob) {
-    _.pastearea.addClass('hidden')
-
+    // _.pastearea.addClass('hidden')
+    $('<h1>').text(blob.name).appendTo(_.filenames[0])
     _.beforeupload.removeClass('hidden')
-    _.filename.text(blob.name)
-    _.description.val(blob.name) // TODO multiple files
-    _.blob = blob
+    if (_.filecount == 0) _.description.val(blob.name)
+    _.blobs.push(blob)
+    _.filenames.push(blob.name)
+    _.filecount++
 }
 
 // called if "upload" botton clicked
@@ -126,7 +132,14 @@ function douploadreally() {
         expirydays: _.expirydays.val() == '' ? _.expirydays.attr('placeholder') : _.expirydays.val(),
         viewercandelete: _.viewercandelete.attr("checked") || false
     }
-    updown.upload(_.blob, _.metadata, progress.bind(this), uploaded.bind(this))
+    if (_.filecount == 1) {
+        updown.upload(_.blobs[0], _.metadata, progress.bind(this), uploaded.bind(this))
+    } else { // zip
+        const compressed = cz.downloadZip(_.blobs).blob()
+        compressed.then(function (b) { // TODO this should be with progress in updown...
+            updown.upload(b, _.metadata, progress.bind(this), uploaded.bind(this))
+        })
+    }
 }
 function closepaste() {
   _.pastearea.removeClass('hidden')
@@ -179,9 +192,7 @@ function pasted(e) {
 }
 
 (function () {
-    console.log("2 "+document.getElementById("filename"))
     var view = $('.modulecontent.modulearea')
-    console.log("asdf=" + view.find('#filename'))
     render(view)
     init()
 }())
