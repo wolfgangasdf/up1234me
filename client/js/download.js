@@ -66,14 +66,15 @@ function unrender() {
     delete this['_']
 }
 
-function downloaded(fileinfo, data) { 
-    _.filename.text(data.header.name)
-    _.loading.hide()
+function downloaded(fileinfo, data) {
     const fi = JSON.parse(fileinfo);
     _.description.text("Description: " + fi.Description)
     _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntilExpiry)
     _.viewercandelete.text("Viewer can delete: " + fi.ViewerCanDelete)
     _.downloadcount.text("Downloads: " + fi.DownloadCount)
+    const fn = data.header.name || fi.Description + ".zip" 
+    _.filename.text(fn)
+    _.loading.hide()
 
     if (fi.ViewerCanDelete) {
         _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
@@ -91,7 +92,7 @@ function downloaded(fileinfo, data) {
 
     _.viewbtn.prop('href', safeurl).hide()
     _.dlbtn.prop('href', url)
-    _.dlbtn.prop('download', data.header.name)
+    _.dlbtn.prop('download', fn)
 
     delete _['content']
     _.detailsarea.empty()

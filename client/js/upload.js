@@ -65,7 +65,7 @@ function render(view) {
     _.progress.amount = view.find('#progressamount')
     _.progress.bg = view.find('#progressamountbg')
     _.beforeupload = view.find('#beforeupload')
-    _.filenames = view.find('#filenames')
+    _.filenamesdiv = view.find('#filenames')
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
     _.viewercandelete = view.find('#viewercandeleteup')
@@ -114,9 +114,14 @@ function progress(e) {
 // this is called if file dropped and prepares upload.
 function doupload(blob) {
     // _.pastearea.addClass('hidden')
-    $('<h2>').text(blob.name).appendTo(_.filenames[0])
+    $('<h2>').text(blob.name).appendTo(_.filenamesdiv[0])
     _.beforeupload.removeClass('hidden')
-    if (_.filecount == 0) _.description.val(blob.name)
+    if (_.filecount == 0) 
+        _.description.val(blob.name)
+    else if (_.filenames[0]==_.description.val()) {
+        const s = _.description.val().split('.').slice(0, -1).join('.')
+        _.description.val(s == "" ? _.description.val() : s)
+    }
     _.blobs.push(blob)
     _.filenames.push(blob.name)
     _.filecount++

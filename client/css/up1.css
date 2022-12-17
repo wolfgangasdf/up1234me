@@ -276,3 +276,8 @@ label {
   font-size: 26px;
   line-height: 125%;
 }
+
+#newupload {
+  position: absolute;
+  right: 5%;
+}
