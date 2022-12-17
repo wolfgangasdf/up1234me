@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -37,13 +39,14 @@ var config Config
 type Metadata struct {
 	Description     string
 	Expirydays      int
+	DaysUntilExpiry int `json:"-"` // calculated at load
 	Viewercandelete bool
 	Downloadcount   int
 }
 
 type FileInfo struct {
 	Description     string
-	DaysUntiExpiry  int
+	DaysUntilExpiry int
 	ViewerCanDelete bool
 	DownloadCount   int
 }
@@ -160,7 +163,6 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		w.Write(msg)
 		return
 	}
-	fmt.Println("description: " + description + " expirydays=" + strconv.Itoa(expirydays) + " viewercandelete=" + strconv.FormatBool(viewercandelete))
 	savaMetadata(identPath, Metadata{Description: description, Expirydays: expirydays, Viewercandelete: viewercandelete})
 
 	out, err := os.Create(identPath)
@@ -188,6 +190,19 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	w.Write(result)
 }
 
+func deletefile(identPath string, ignoreerrors bool) {
+	if err := os.Remove(identPath); err != nil {
+		if !ignoreerrors {
+			panic(err)
+		}
+	}
+	if err := os.Remove(identPath + ".json"); err != nil {
+		if !ignoreerrors {
+			panic(err)
+		}
+	}
+}
+
 func delfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("delete: url=" + r.URL.Path)
 	ident := r.FormValue("ident")
@@ -212,12 +227,8 @@ func delfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := os.Remove(identPath); err != nil {
-		panic(err)
-	}
-	if err := os.Remove(identPath + ".json"); err != nil {
-		panic(err)
-	}
+	deletefile(identPath, false)
+
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
@@ -228,6 +239,16 @@ func loadMetadata(identPath string) (Metadata, error) {
 		return md, err
 	}
 	err = json.Unmarshal([]byte(file), &md)
+	if md.Expirydays > 0 {
+		if ifile, err := os.Stat(identPath); err == nil {
+			md.DaysUntilExpiry = md.Expirydays - int(time.Since(ifile.ModTime()).Hours()/24)
+			if md.DaysUntilExpiry < 0 {
+				md.DaysUntilExpiry = 0
+			}
+		}
+	} else {
+		md.DaysUntilExpiry = -1
+	}
 	return md, err
 }
 
@@ -242,10 +263,7 @@ func indexi(w http.ResponseWriter, r *http.Request) {
 	}
 	md.Downloadcount++
 	savaMetadata(identPath, md)
-	fi := FileInfo{Description: md.Description, DaysUntiExpiry: -1, ViewerCanDelete: md.Viewercandelete, DownloadCount: md.Downloadcount}
-	if ifile, err := os.Stat(identPath); err == nil {
-		fi.DaysUntiExpiry = md.Expirydays - int(time.Since(ifile.ModTime()).Hours()/24)
-	}
+	fi := FileInfo{Description: md.Description, DaysUntilExpiry: md.DaysUntilExpiry, ViewerCanDelete: md.Viewercandelete, DownloadCount: md.Downloadcount}
 	jsonstring, err := json.Marshal(fi)
 	if err != nil {
 		panic(err)
@@ -253,6 +271,39 @@ func indexi(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Fileinfo", string(jsonstring))
 
 	http.ServeFile(w, r, identPath)
+}
+
+func expire() {
+	time.Sleep(10 * time.Second)
+	for {
+		fmt.Println("expire: reading directory content...")
+		files, err := os.ReadDir(config.Path.I)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var iii = 0
+		for _, file := range files {
+			if !strings.HasSuffix(file.Name(), ".json") {
+				iii++
+				identPath := filepath.Join(config.Path.I, file.Name())
+				if iii%int(math.Ceil(float64(len(files))/10.0)) == 0 {
+					fmt.Println("expire: checking " + identPath)
+				}
+				md, err := loadMetadata(identPath)
+				if err != nil {
+					fmt.Println("expire: error loading metadata for " + identPath)
+				} else {
+					if md.DaysUntilExpiry == 0 {
+						fmt.Println("expire: delete " + identPath)
+						deletefile(identPath, true)
+					}
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}
+		fmt.Println("expire: finished, sleeping...")
+		time.Sleep(24 * time.Hour)
+	}
 }
 
 func main() {
@@ -279,6 +330,8 @@ func main() {
 		log.Printf("Starting HTTP server on %s\n", config.Http.Listen)
 		log.Println(http.ListenAndServe(config.Http.Listen, nil))
 	}()
+
+	go expire() // run in goroutine
 
 	wg.Wait()
 }

@@ -31,6 +31,7 @@ function render(view) {
     _.newupload = view.find('#newupload')
     _.dlarea = view.find('#dlarea')
     _.title = $('title')
+    $(document).on('click', '#deletebtn', deleteupload.bind(this))
     $('#footer').hide()
 }
 function initroute(content, contentroot) {
@@ -74,7 +75,7 @@ function downloaded(fileinfo, data) {
     _.title.text(data.header.name + ' - Up1')
     const fi = JSON.parse(fileinfo);
     _.description.text("Description: " + fi.Description)
-    _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntiExpiry)
+    _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntilExpiry)
     _.viewercandelete.text("Viewer can delete: " + fi.ViewerCanDelete)
     _.downloadcount.text("Downloads: " + fi.DownloadCount)
 
@@ -104,6 +105,11 @@ function downloaded(fileinfo, data) {
     _.filename.show()
     _.btns.show()
 }
+function deleteupload() {
+    console.log("delete upload: clear cache!")
+    updown.cachedelete()
+}
+
 function progress(e) {
     if (e == 'decrypting') {
         _.loading.text('Decrypting')

@@ -63,9 +63,12 @@ function uploadencrypted(metadata, progress, done, data) {
         type: 'POST'
     }).done(done.bind(undefined, data))
 }
-function cache(seed, data) { // TODO remove? But it does download and decrypt immediately...
+function cache(seed, data) { // TODO remove? But after upload, it does download and decrypt immediately...
   cached = data
   cached_seed = seed
+}
+export function cachedelete() {
+  cache({}, {})
 }
 function cacheresult(data) {
   cache(data.seed, data.encrypted)
