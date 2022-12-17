@@ -34,7 +34,7 @@ function downloaded(seed, progress, done, response) {
       crypt.decrypt(response.target.response, seed).done(done)
     }
 }
-function encrypted(progress, done, data) {
+function uploadencrypted(progress, done, data) {
     var formdata = new FormData()
     formdata.append('api_key', config.api_key)
     formdata.append('ident', data.ident)
@@ -70,7 +70,7 @@ export function download(seed, progress, done) {
     }
 }
 export function upload(blob, progress, done) {
-  crypt.encrypt(blob).done(encrypted.bind(this, progress, done)).done(cacheresult.bind(this)).progress(progress)
+  crypt.encrypt(blob).done(uploadencrypted.bind(this, progress, done)).done(cacheresult.bind(this)).progress(progress)
 }
 
 (function () {

@@ -171,25 +171,10 @@ function pasted(e) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 (function () {
     console.log("2 "+document.getElementById("filename"))
-    document.getElementById("filename").innerHTML = "huhu"
-    console.log("cc: " + config.api_key)
-    console.log("asdf=" + $('.modulecontent.modulearea'))
     var view = $('.modulecontent.modulearea')
     console.log("asdf=" + view.find('#filename'))
-    view.find('#filename')[0].innerHTML = "hoho"
     render(view)
     init()
 }())

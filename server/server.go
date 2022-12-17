@@ -216,20 +216,11 @@ func main() {
 	// http basic auth
 	authenticator := auth.NewBasicAuthenticator("up1234me", auth.HtpasswdFileProvider("server.htpasswd"))
 
-	// http.Handle("/i/", http.StripPrefix("/i", http.FileServer(http.Dir(config.Path.I))))
-	http.HandleFunc("/i/", indexi)
+	http.HandleFunc("/i/", indexi) // serve encrypted files and unencrypted metadata
 	http.HandleFunc("/up", authenticator.Wrap(upload))
-	http.HandleFunc("/d/", download)
 	http.HandleFunc("/del", delfile)
-	// http.HandleFunc("/", authenticator.Wrap(index))
-	http.HandleFunc("/", index)
-
-	// // http.Handle("/i/", http.StripPrefix("/i", http.FileServer(http.Dir(config.Path.I))))
-	// http.HandleFunc("/i/", indexi)                     // encrypted storage /i
-	// http.HandleFunc("/up", authenticator.Wrap(upload)) // upload -> client/upload.html, auth
-	// http.HandleFunc("/del", delfile)                   // delete route
-	// // http.HandleFunc("/", authenticator.Wrap(index))
-	// http.HandleFunc("/", index) // everything under client
+	http.HandleFunc("/d/", download) // download screen
+	http.HandleFunc("/", index)      // serve all other files
 
 	var wg sync.WaitGroup
 	wg.Add(2)
