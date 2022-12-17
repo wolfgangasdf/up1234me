@@ -27,10 +27,8 @@ function render(view) {
     _.nextbtn = view.find('#nextbtn')
     _.prevbtn = view.find('#prevbtn')
     _.viewbtn = view.find('#inbrowserbtn')
-    _.viewswitcher = view.find('.viewswitcher')
     _.newupload = view.find('#newupload')
     _.dlarea = view.find('#dlarea')
-    _.title = $('title')
     $(document).on('click', '#deletebtn', deleteupload.bind(this))
     $('#footer').hide()
 }
@@ -58,7 +56,6 @@ function initroute(content, contentroot) {
     console.log("contentroot=", contentroot)
     delete _['text']
     _.filename.hide()
-    _.title.text("Up1")
     _.btns.hide()
     _.newupload.hide()
     _.deletebtn.hide()
@@ -66,13 +63,12 @@ function initroute(content, contentroot) {
     updown.download(content, progress.bind(this), downloaded.bind(this))
 }
 function unrender() {
-    _.title.text('Up1')
     delete this['_']
 }
 
 function downloaded(fileinfo, data) { 
     _.filename.text(data.header.name)
-    _.title.text(data.header.name + ' - Up1')
+    _.loading.hide()
     const fi = JSON.parse(fileinfo);
     _.description.text("Description: " + fi.Description)
     _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntilExpiry)

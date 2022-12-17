@@ -68,7 +68,7 @@ function render(view) {
     _.filenames = view.find('#filenames')
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
-    _.viewercandelete = view.find('#viewercandelete')
+    _.viewercandelete = view.find('#viewercandeleteup')
     $('#footer').show()
 }
 
@@ -114,7 +114,7 @@ function progress(e) {
 // this is called if file dropped and prepares upload.
 function doupload(blob) {
     // _.pastearea.addClass('hidden')
-    $('<h1>').text(blob.name).appendTo(_.filenames[0])
+    $('<h2>').text(blob.name).appendTo(_.filenames[0])
     _.beforeupload.removeClass('hidden')
     if (_.filecount == 0) _.description.val(blob.name)
     _.blobs.push(blob)
@@ -140,16 +140,6 @@ function douploadreally() {
             updown.upload(b, _.metadata, progress.bind(this), uploaded.bind(this))
         })
     }
-}
-function closepaste() {
-  _.pastearea.removeClass('hidden')
-  _.view.find('#uploadview').show()
-  _.view.find('.viewswitcher').show()
-}
-function dopasteupload(data) {
-    _.pastearea.addClass('hidden')
-    _.view.find('#uploadview').hide()
-    _.view.find('.viewswitcher').hide()
 }
 
 function uploaded(data, response) {
