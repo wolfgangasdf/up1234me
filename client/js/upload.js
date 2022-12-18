@@ -68,20 +68,12 @@ function render(view) {
     $('#uploadreally').hide()
 }
 
-function initroute() {
-    focuspaste()
-}
-
-function unrender() {
-    delete this['_']
-}
-
 function initpastecatcher() {
     var pastecatcher = $('<pre>').prop('id', 'pastecatcher')
     pastecatcher.prop('contenteditable', true)
     $('body').append(pastecatcher)
 }
-function vfocuspaste() {
+function focuspaste() {
     setTimeout(function () {
         pastecatcher.focus()
     }, 100)
@@ -160,7 +152,14 @@ function uploaded(data, response) {
         _.progress.type.text("Error")
         _.progress.amount.text(response.error)
     } else {
-        window.location = 'd/#' + data.seed
+        let locrel = 'd/#' + data.seed
+        navigator.clipboard.writeText(window.location + locrel).then(function() {
+            console.log('Copying to clipboard was successful!');
+            window.location = locrel
+          }, function(err) {
+            console.error('Could not copy text to clipboard: ', err);
+            window.location = locrel
+          });
     }
     // TODO
     // if (window.location.hash == '#noref') {

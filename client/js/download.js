@@ -6,11 +6,6 @@ import * as config from "../config.js"
 
 
 var _ = {}
-function route(route, content) {
-    if (content != 'noref') {
-        return this
-    }
-}
 
 function render(view) {
     _ = {}
@@ -39,9 +34,6 @@ function initroute(content, contentroot) {
     _.deletebtn.hide()
 
     updown.download(content, progress.bind(this), downloaded.bind(this))
-}
-function unrender() {
-    delete this['_']
 }
 
 function downloaded(fileinfo, data) {
@@ -111,7 +103,7 @@ function progress(e) {
   var view = $('body')
   render(view)
 
-  console.log("location: " + window.location.hash)
+  console.log("location: " + window.location.hash, window.location)
   initroute(window.location.hash.substring(1))
 
 }())

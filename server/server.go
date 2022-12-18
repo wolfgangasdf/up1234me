@@ -62,6 +62,7 @@ type SuccessMessage struct {
 
 func readConfig(name string) Config {
 	file, _ := os.Open(name)
+	defer file.Close()
 	decoder := json.NewDecoder(file)
 	config := Config{}
 	err := decoder.Decode(&config)
@@ -82,10 +83,14 @@ func validateConfig(config Config) {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("index: url=" + r.URL.Path)
+	http.ServeFile(w, r, filepath.Join(config.Path.Client, r.URL.Path[1:]))
+}
+
+func indexauth(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
+	r := ar.Request
+	fmt.Println("indexauth: url=" + r.URL.Path)
 	if r.URL.Path == "/" {
-		http.ServeFile(w, r, filepath.Join(config.Path.Client, "upload.html"))
-	} else {
-		http.ServeFile(w, r, filepath.Join(config.Path.Client, r.URL.Path[1:]))
+		http.ServeFile(w, &r, filepath.Join(config.Path.Client, "upload.html"))
 	}
 }
 
@@ -360,8 +365,13 @@ func main() {
 	http.HandleFunc("/up", authenticator.Wrap(upload)) // upload receiver
 	http.HandleFunc("/del", delfile)
 	http.HandleFunc("/d/", download) // download.html
-	http.HandleFunc("/", index)      // serve all other files
 	http.HandleFunc("/admin/", authenticator.Wrap(admin))
+	http.HandleFunc("/", authenticator.Wrap(indexauth)) // this serves upload.html
+	http.HandleFunc("/js/", index)
+	http.HandleFunc("/deps/", index)
+	http.HandleFunc("/favicon/", index)
+	http.HandleFunc("/css/", index)
+	http.HandleFunc("/config.js", index)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
