@@ -11,6 +11,13 @@ function init() {
     updatefilelist(0)
 }
 
+function render(view) {
+  _.view = view
+  _.totalfilecount = view.find('#totalfilecount')
+  _.totalsize = view.find('#totalsize')
+  _.filelist = view.find('#filelist')
+}
+
 function updateinfo() {
     fetch("/admin/get_info").then(function(response) {
         return response.json();
@@ -33,27 +40,38 @@ function updatefilelist(pageindex) {
     ).then(function(response) {
         return response.json();
       }).then(function(data) {
-        for (const fii in data.FileList) {
+          console.log("XXXXX ", data)
+          _.filelist.append($("<tr>")
+            .append($("<th>").text("Description"))
+            .append($("<th>").text("FileDate"))
+            .append($("<th>").text("FileSize"))
+            .append($("<th>").text("FileName"))
+            .append($("<th>").text("Expirydays"))
+            .append($("<th>").text("DaysUntilExpiry"))
+            .append($("<th>").text("Viewercandelete"))
+            .append($("<th>").text("Downloadcount"))
+          )
+    for (const fii in data.FileList) {
             let fi = data.FileList[fii]
-            $("<DIV>").text(fi.Description + " " + fi.Filename).appendTo(_.filelist)
+            _.filelist.append($("<tr>")
+                .append($("<td>").text(fi.Description))
+                .append($("<td>").text(fi.FileDate))
+                .append($("<td>").text(fi.FileSize))
+                .append($("<td>").text(fi.FileName))
+                .append($("<td>").text(fi.Expirydays))
+                .append($("<td>").text(fi.DaysUntilExpiry))
+                .append($("<td>").text(fi.Viewercandelete))
+                .append($("<td>").text(fi.Downloadcount))
+            )
         } 
       }).catch(function(err) {
         console.log('Fetch Error: ', err);
       });
-
 }
 
 function deleteallbefore() {
 
 }
-
-function render(view) {
-    _.view = view
-    _.totalfilecount = view.find('#totalfilecount')
-    _.totalsize = view.find('#totalsize')
-    _.filelist = view.find('#filelist')
-}
-
 
 (function () {
     var view = $('body')

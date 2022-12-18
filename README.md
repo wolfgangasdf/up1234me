@@ -18,11 +18,18 @@ For a quick start, simply move `server.conf.example` to `server.conf`.
 
 `listen` is an `address:port`-formatted string, where either one are optional. Some examples include `":9000"` to listen on any interface, port 9000; `"127.0.0.1"` to listen on localhost port 80; `"1.1.1.1:8080"` to listen on 1.1.1.1 port 8080; or even `""` to listen on any interface, port 80.
 
-`api_key` is a very basic security measure, requiring any client making an upload to know this key. This doesn't seem very useful and should be revamped; replace it with HTTP auth maybe?
-
 `maximum_file_size` is the largest file, in bytes, that's allowed to be uploaded to the server. The default here is a decimal 50MB.
 
-For the web application configuration, a [`config.js.example`](https://github.com/Upload/Up1/config.js.example) file is provided. Make sure the `api_key` here matches the one in `server.conf`.
+For the web application configuration, a `config.js.example` file is provided, copy over...
+
+=== http auth ===
+`cd server`
+
+`htpasswd -c server.htpasswd <username>`
+
+=== build ===
+
+`go build && ./up1234me`
 
 
 How it works

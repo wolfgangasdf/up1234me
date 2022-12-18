@@ -21,7 +21,6 @@ import (
 
 type Config struct {
 	Listen      string `json:"listen"`
-	ApiKey      string `json:"api_key"`
 	MaxFileSize int64  `json:"maximum_file_size"`
 
 	Path struct {
@@ -39,9 +38,12 @@ var config Config
 type Metadata struct {
 	Description     string
 	Expirydays      int
-	DaysUntilExpiry int `json:"-"` // calculated at load
+	DaysUntilExpiry int `json:",omitempty"` // calculated at load
 	Viewercandelete bool
 	Downloadcount   int
+	FileDate        time.Time `json:",omitempty"`
+	FileSize        int64     `json:",omitempty"`
+	FileName        string    `json:",omitempty"`
 }
 
 type FileInfo struct {
@@ -71,9 +73,6 @@ func readConfig(name string) Config {
 }
 
 func validateConfig(config Config) {
-	if len(config.ApiKey) == 0 {
-		log.Fatal("A static key must be defined in the configuration!")
-	}
 	if len(config.Path.I) == 0 {
 		config.Path.I = "../i"
 	}
@@ -114,19 +113,8 @@ type AdminInfo struct {
 	Totalsize      int
 }
 
-type AdminFileInfo struct {
-	Description     string
-	Date            time.Time
-	Size            int
-	Filename        string
-	Expirydays      int
-	DaysUntilExpiry int
-	Viewercandelete bool
-	Downloadcount   int
-}
-
 type AdminFileList struct {
-	FileList []AdminFileInfo
+	FileList []Metadata
 }
 
 func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
@@ -141,17 +129,29 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		return
 	} else if r.URL.Path == "/admin/get_files" {
 		fmt.Println("admin: get_file: " + r.FormValue("startindex"))
-		afl := &AdminFileList{
-			FileList: []AdminFileInfo{
-				{Description: "desc1", Date: time.Now(), Size: 123, Filename: "fname", Expirydays: 10, DaysUntilExpiry: 5, Viewercandelete: false, Downloadcount: 999},
-				{Description: "desc2", Date: time.Now(), Size: 123, Filename: "fname", Expirydays: 10, DaysUntilExpiry: 5, Viewercandelete: false, Downloadcount: 999},
-			},
+
+		files, err := os.ReadDir(config.Path.I)
+		if err != nil {
+			log.Fatal(err)
 		}
-		msg, _ := json.Marshal(afl) // TODO
+		afl := &AdminFileList{FileList: []Metadata{}}
+		for _, file := range files {
+			if strings.HasSuffix(file.Name(), ".json") {
+				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
+				md, err := loadMetadata(identPath)
+				if err != nil {
+					log.Fatal(err)
+				}
+				afl.FileList = append(afl.FileList, md)
+			}
+		}
+		msg, _ := json.Marshal(afl)
 		w.Write(msg)
 		return
 	} else if r.URL.Path == "/admin/delete_all_before" {
+		// TODO
 	} else if r.URL.Path == "/admin/delete_file" {
+		// TODO
 	}
 }
 
@@ -173,13 +173,6 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	}
 
 	defer file.Close()
-
-	apikey := r.FormValue("api_key")
-	if apikey != config.ApiKey {
-		msg, _ := json.Marshal(&ErrorMessage{Error: "API key doesn't match", Code: 2})
-		w.Write(msg)
-		return
-	}
 
 	ident := r.FormValue("ident")
 	if len(ident) != 22 {
@@ -285,12 +278,15 @@ func loadMetadata(identPath string) (Metadata, error) {
 		return md, err
 	}
 	err = json.Unmarshal([]byte(file), &md)
+	if ifile, err := os.Stat(identPath); err == nil {
+		md.FileDate = ifile.ModTime()
+		md.FileSize = ifile.Size()
+		md.FileName = ifile.Name()
+	}
 	if md.Expirydays > 0 {
-		if ifile, err := os.Stat(identPath); err == nil {
-			md.DaysUntilExpiry = md.Expirydays - int(time.Since(ifile.ModTime()).Hours()/24)
-			if md.DaysUntilExpiry < 0 {
-				md.DaysUntilExpiry = 0
-			}
+		md.DaysUntilExpiry = md.Expirydays - int(time.Since(md.FileDate).Hours()/24)
+		if md.DaysUntilExpiry < 0 {
+			md.DaysUntilExpiry = 0
 		}
 	} else {
 		md.DaysUntilExpiry = -1

@@ -42,7 +42,6 @@ function downloaded(seed, progress, done, response) {
 }
 function uploadencrypted(metadata, progress, done, data) {
     var formdata = new FormData()
-    formdata.append('api_key', config.api_key)
     formdata.append('ident', data.ident)
     formdata.append('file', data.encrypted)
     formdata.append('description', metadata.description) // TODO in json?
