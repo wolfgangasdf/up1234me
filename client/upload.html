@@ -16,29 +16,22 @@
 </head>
 
 <body>
-    <div class="modulecontent modulearea">
-        <div class="topbar">
-            <span class="btn">Uploads require authentication</span>.
-        </div>
-        <div class="contentarea" id="uploadview">
-            <div class="centerview">
-                <div id="pastearea" class="boxarea">
-                    <h1>Upload (or drop here)</h1>
-                </div>
-                <div class="hidden boxarea" id="uploadprogress">
-                    <h1 id="progresstype"></h1>
-                    <h1 id="progressamount"></h1>
-                    <div id="progressamountbg"></div>
-                </div>
-                <form>
-                    <input type="file" id="filepicker" class="hidden" />
-                </form>
+    <div class="topbar">
+        <span class="btn flexele">Uploads require authentication</span>.
+    </div>
+    <div class="contentarea" id="uploadview">
+        <div class="centerview flexele">
+            <div id="pastearea" class="boxarea">
+                <h1>Upload (or drop here)</h1>
             </div>
-            <div class="beforeupload" id="beforeupload">
-                <h1>Description (unencrypted):</h1>
-                <p><input id="description" type="text" size="50" class="inputthings" /></p>
-                <p><label>Expiry in days:<input id="expirydays" type="number" list="expirydayslist" placeholder="30" step="10" min="1"
-                    max="100000" class="inputthings" />
+            <form>
+                <input type="file" id="filepicker" class="hidden" />
+            </form>
+        </div>
+        <div class="flexele" id="beforeupload">
+            <div class="flexele row">Description (unencrypted):<input id="description" type="text" size="50" class="inputthings" /></div>
+            <div class="flexele row">Expiry in days:<input id="expirydays" type="number" list="expirydayslist" placeholder="30" step="10" min="1"
+                max="100000" class="inputthings" />
                 <datalist id="expirydayslist">
                     <option>1</option>
                     <option>7</option>
@@ -46,14 +39,19 @@
                     <option>150</option>
                     <option>365</option>
                 </datalist>
-                </label></p>
-                <p><label>Viewer can delete:<input id="viewercandeleteup" type="checkbox" checked /></label></p>
-                <button class="btn" id="uploadreally" type="button">Upload!</button>
-                <h1>Files:</h1>
-                <div id="filenames"></div>
             </div>
-        </div>',
-    </div>
+            <div class="flexele row">Viewer can delete:<input id="viewercandeleteup" type="checkbox" checked /></div>
+            <button class="btn bigcenterbutton" id="uploadreally" type="button">Upload!</button>
+            <div class="flexele row">Files:</div>
+            <div class="flexele" id="filenames"></div>
+            
+        </div>
+        <div class="boxarea flexele hidden" id="uploadprogress"> 
+            <h1 id="progresstype">type</h1>
+            <h1 id="progressamount">amount</h1>
+            <div id="progressamountbg"></div>
+        </div>
+</div>',
 
     <noscript class="noscript">
         <h2>

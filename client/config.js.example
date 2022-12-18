@@ -1,1 +1,2 @@
-upload.config.api_key = 'c61540b5ceecd05092799f936e27755f' // Should be the same as the server, used for uploading
+export const api_key = 'c61540b5ceecd05092799f936e27755f' // Should be the same as the server, used for uploading
+export const downloadautomatically = true // initiate download automatically?

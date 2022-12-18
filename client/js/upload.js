@@ -34,9 +34,7 @@ function drop(e) {
     console.log("dropped!!!")
     e.preventDefault()
     _.pastearea.removeClass('dragover')
-    if (e.dataTransfer.files.length > 0) {
-        doupload(e.dataTransfer.files[0])
-    }
+    douploadmultiple(e.dataTransfer.files)
 }
 
 function dragover(e) {
@@ -49,10 +47,8 @@ function pickfile(e) {
 }
 
 function pickerchange(e) {
-    if (e.target.files.length > 0) {
-        doupload(e.target.files[0])
-        $(e.target).parents('form')[0].reset()
-    }
+    douploadmultiple(e.target.files)
+    $(e.target).parents('form')[0].reset()
 }
 
 function render(view) {
@@ -69,6 +65,7 @@ function render(view) {
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
     _.viewercandelete = view.find('#viewercandeleteup')
+    $('#uploadreally').hide()
 }
 
 function initroute() {
@@ -110,14 +107,22 @@ function progress(e) {
     _.progress.bg.css('width', percent + '%')
     _.progress.amount.text(Math.floor(percent) + '%')
 }
-// this is called if file dropped and prepares upload.
+
+function douploadmultiple(files) {
+    for (var i = 0; i < files.length; i++) {
+        console.log("files[" + i + "]=" + files[i])
+        doupload(files[i])
+    }    
+}
+
+// this adds one file to upload
 function doupload(blob) {
-    // _.pastearea.addClass('hidden')
-    $('<h2>').text(blob.name).appendTo(_.filenamesdiv[0])
+    $('#uploadreally').show()
+    $('<div>').text(blob.name).appendTo(_.filenamesdiv[0])
     _.beforeupload.removeClass('hidden')
     if (_.filecount == 0) 
         _.description.val(blob.name)
-    else if (_.filenames[0]==_.description.val()) {
+    else if (_.filenames[0]==_.description.val()) { // remove extension from description if description unchanged
         const s = _.description.val().split('.').slice(0, -1).join('.')
         _.description.val(s == "" ? _.description.val() : s)
     }
@@ -178,7 +183,6 @@ function pasted(e) {
             var blob = items[i].getAsFile()
             if (blob) {
                 doupload(blob)
-                break
             }
         }
 
@@ -186,7 +190,7 @@ function pasted(e) {
 }
 
 (function () {
-    var view = $('.modulecontent.modulearea')
+    var view = $('body')
     render(view)
     init()
 }())

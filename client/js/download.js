@@ -2,6 +2,7 @@ import "./loadencryption.js"
 import * as updown from "./updown.js"
 import "./shims.js"
 import "../deps/zepto.min.js"
+import * as config from "../config.js"
 
 
 var _ = {}
@@ -18,7 +19,6 @@ function render(view) {
     _.loading = view.find('#downloadprogress')
     _.description = view.find('#description')
     _.daysuntilexpiry = view.find('#daysuntilexpiry')
-    _.viewercandelete = view.find('#viewercandelete')
     _.downloadcount = view.find('#downloadcount')
     _.filename = view.find('#downloaded_filename')
     _.btns = view.find('#btnarea')
@@ -46,10 +46,9 @@ function unrender() {
 
 function downloaded(fileinfo, data) {
     const fi = JSON.parse(fileinfo);
-    _.description.text("Description: " + fi.Description)
-    _.daysuntilexpiry.text("Days until expiry: " + fi.DaysUntilExpiry)
-    _.viewercandelete.text("Viewer can delete: " + fi.ViewerCanDelete)
-    _.downloadcount.text("Downloads: " + fi.DownloadCount)
+    _.description.text(fi.Description)
+    _.daysuntilexpiry.text(fi.DaysUntilExpiry)
+    _.downloadcount.text(fi.DownloadCount)
     const fn = data.header.name || fi.Description + ".zip" 
     _.filename.text(fn)
     _.loading.hide()
@@ -79,6 +78,10 @@ function downloaded(fileinfo, data) {
 
     _.filename.show()
     _.btns.show()
+    if (config.downloadautomatically) {
+        _.dlbtn.click() 
+        _.dlbtn.text("Download again")
+    }
 }
 function deleteupload() {
     console.log("delete upload: clear cache!")
@@ -104,7 +107,7 @@ function progress(e) {
 }
 
 (function () {
-  var view = $('.modulecontent.modulearea')
+  var view = $('body')
   render(view)
 
   console.log("location: " + window.location.hash)
