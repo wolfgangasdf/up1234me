@@ -17,11 +17,11 @@ Changes compared to Up1
 
 Getting started
 ===
-* copy `server.conf.example` to `server.conf` and adapt
-* copy `config.js.example` to `config.js` and adapt
-* download release or compile (below)
+* download an executable of `up1234me` or compile (below)
+* create `server.conf` based on [server.conf.example](server.conf.example)
+  * run locally and use reverse SSL proxy for https!
+* create `config.js` based on [config.js.example](config.js.example)
 * create http basic auth file in the `server` folder: `htpasswd -c server.htpasswd <username>`
-* make reverse SSL proxy
 * run `./up1234me`
 
 
