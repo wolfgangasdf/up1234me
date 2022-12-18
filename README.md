@@ -48,8 +48,12 @@ Build and run
 
 Used libraries
 ===
-* [client-zip](https://github.com/Touffy/client-zip) via https://cdn.jsdelivr.net/npm/client-zip/index.js
 * [Up1](https://github.com/Upload/Up1) Everything is based on this, too many changes to fork it. Commit version [90c525a](https://github.com/Upload/Up1/commit/90c525a05db43c1063b02dd6164bf645bd569c81).
+* [client-zip](https://github.com/Touffy/client-zip) via https://cdn.jsdelivr.net/npm/client-zip/index.js
+* [go-bindata](https://github.com/go-bindata/go-bindata)
+* [sjcl](https://github.com/bitwiseshiftleft/sjcl) from Up1
+* [zeptojs](http://zeptojs.com/)
+* [http basic auth](github.com/abbot/go-http-auth)
 
 
 License
