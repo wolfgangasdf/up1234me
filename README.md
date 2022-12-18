@@ -33,7 +33,7 @@ Prepare static bindata (to have single executable)
 ```
 go get -u github.com/go-bindata/go-bindata/v3/... 
 # one of:
-go-bindata        client/...      # put static files into bindata.go
+go-bindata client/...        # put static files into bindata.go
 go-bindata -debug client/... # development: use normal files via bindata.go
 ```
 
