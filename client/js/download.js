@@ -94,6 +94,7 @@ function progress(e) {
     } else if (e == 'error') {
       _.loading.text('File not found or corrupt')
       _.newupload.show()
+      _.dlbtn.hide()
     } else {
         var text = ''
         if (e.eventsource != 'encrypt') {

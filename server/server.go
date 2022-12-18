@@ -109,6 +109,52 @@ func savaMetadata(identPath string, md Metadata) error {
 	return nil
 }
 
+type AdminInfo struct {
+	Totalfilecount int
+	Totalsize      int
+}
+
+type AdminFileInfo struct {
+	Description     string
+	Date            time.Time
+	Size            int
+	Filename        string
+	Expirydays      int
+	DaysUntilExpiry int
+	Viewercandelete bool
+	Downloadcount   int
+}
+
+type AdminFileList struct {
+	FileList []AdminFileInfo
+}
+
+func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
+	r := ar.Request
+	fmt.Println("admin: url=" + r.URL.Path)
+	if r.URL.Path == "/admin/" {
+		http.ServeFile(w, &r, filepath.Join(config.Path.Client, "admin.html"))
+		return
+	} else if r.URL.Path == "/admin/get_info" {
+		msg, _ := json.Marshal(&AdminInfo{Totalfilecount: 123, Totalsize: 321}) // TODO
+		w.Write(msg)
+		return
+	} else if r.URL.Path == "/admin/get_files" {
+		fmt.Println("admin: get_file: " + r.FormValue("startindex"))
+		afl := &AdminFileList{
+			FileList: []AdminFileInfo{
+				{Description: "desc1", Date: time.Now(), Size: 123, Filename: "fname", Expirydays: 10, DaysUntilExpiry: 5, Viewercandelete: false, Downloadcount: 999},
+				{Description: "desc2", Date: time.Now(), Size: 123, Filename: "fname", Expirydays: 10, DaysUntilExpiry: 5, Viewercandelete: false, Downloadcount: 999},
+			},
+		}
+		msg, _ := json.Marshal(afl) // TODO
+		w.Write(msg)
+		return
+	} else if r.URL.Path == "/admin/delete_all_before" {
+	} else if r.URL.Path == "/admin/delete_file" {
+	}
+}
+
 func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	fmt.Println("upload: url=" + r.Request.URL.Path)
 	if r.ContentLength > config.MaxFileSize {
@@ -321,6 +367,7 @@ func main() {
 	http.HandleFunc("/del", delfile)
 	http.HandleFunc("/d/", download) // download.html
 	http.HandleFunc("/", index)      // serve all other files
+	http.HandleFunc("/admin/", authenticator.Wrap(admin))
 
 	var wg sync.WaitGroup
 	wg.Add(2)

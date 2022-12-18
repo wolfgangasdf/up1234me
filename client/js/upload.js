@@ -153,7 +153,10 @@ function douploadreally() {
 
 function uploaded(data, response) {
     console.log("uploaded: response=", response, " data=", data)
-    if (response.code) {
+    if (!response) {
+        _.progress.type.text("Error")
+        _.progress.amount.text("response null")
+    } else if (response.code) {
         _.progress.type.text("Error")
         _.progress.amount.text(response.error)
     } else {

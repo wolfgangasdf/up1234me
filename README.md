@@ -1,5 +1,7 @@
 Up1234me: A Client-side Encrypted File Host based on [Up1](https://github.com/Upload/Up1)
 
+With the added changes it is my personal dropbox for sensitive files.
+
 ===
 Changes compared to Up1:
 * http basic authentication for upload and admin
