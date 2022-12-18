@@ -33,8 +33,8 @@ Prepare static bindata (to have single executable)
 ```
 go get -u github.com/go-bindata/go-bindata/v3/... 
 # one of:
-go-bindata        -fs -prefix "client/" client/...      # put static files into bindata.go
-go-bindata -debug -fs -prefix "client/" client/... # development: use normal files via bindata.go
+go-bindata        client/...      # put static files into bindata.go
+go-bindata -debug client/... # development: use normal files via bindata.go
 ```
 
 Cross-build

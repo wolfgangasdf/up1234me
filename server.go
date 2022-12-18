@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -24,8 +25,7 @@ type Config struct {
 	MaxFileSize int64  `json:"maximum_file_size"`
 
 	Path struct {
-		I      string `json:"i"`
-		Client string `json:"client"`
+		I string `json:"i"`
 	} `json:"path"`
 
 	Http struct {
@@ -76,24 +76,28 @@ func validateConfig(config Config) {
 	if len(config.Path.I) == 0 {
 		config.Path.I = "../i"
 	}
-	if len(config.Path.Client) == 0 {
-		config.Path.Client = "../client"
+}
+
+// serve files from go-bindata, print but ignore errors.
+func serveFileAsset(w http.ResponseWriter, pathBelowClient string) {
+	fmt.Println("serveFileAsset: " + pathBelowClient)
+	mimeType := mime.TypeByExtension(filepath.Ext(pathBelowClient))
+	// fmt.Println("mime: ", mimeType)
+	b, err := Asset("client/" + pathBelowClient)
+	if err != nil {
+		log.Println(err)
+	} else {
+		w.Header().Set("Content-Type", mimeType)
+		w.Write(b)
 	}
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("index: url=" + r.URL.Path)
 	if r.URL.Path == "/config.js" {
-		// b, err := Asset(r.URL.Path)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// w.Write(b)
 		http.ServeFile(w, r, "./config.js")
 	} else {
-		// b, _ := Asset(r.URL.Path[1:])
-		// w.Write(b)
-		http.ServeFile(w, r, filepath.Join(config.Path.Client, r.URL.Path[1:]))
+		serveFileAsset(w, r.URL.Path[1:])
 	}
 }
 
@@ -101,13 +105,13 @@ func indexauth(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	r := ar.Request
 	fmt.Println("indexauth: url=" + r.URL.Path)
 	if r.URL.Path == "/" {
-		http.ServeFile(w, &r, filepath.Join(config.Path.Client, "upload.html"))
+		serveFileAsset(w, "upload.html")
 	}
 }
 
 func download(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("download: url=" + r.URL.Path)
-	http.ServeFile(w, r, filepath.Join(config.Path.Client, "download.html"))
+	serveFileAsset(w, "download.html")
 }
 
 func savaMetadata(identPath string, md Metadata) error {
@@ -136,7 +140,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	r := ar.Request
 	fmt.Println("admin: url=" + r.URL.Path)
 	if r.URL.Path == "/admin/" {
-		http.ServeFile(w, &r, filepath.Join(config.Path.Client, "admin.html"))
+		serveFileAsset(w, "admin.html")
 		return
 	} else if r.URL.Path == "/admin/get_info" {
 		msg, _ := json.Marshal(&AdminInfo{Totalfilecount: 123, Totalsize: 321}) // TODO

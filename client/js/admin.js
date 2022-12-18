@@ -40,7 +40,6 @@ function updatefilelist(pageindex) {
     ).then(function(response) {
         return response.json();
       }).then(function(data) {
-          console.log("XXXXX ", data)
           _.filelist.append($("<tr>")
             .append($("<th>").text("Description"))
             .append($("<th>").text("FileDate"))
