@@ -19,14 +19,12 @@ function render(view) {
     _.deletebtn = view.find('#deletebtn')
     _.dlbtn = view.find('#dlbtn')
     _.viewbtn = view.find('#inbrowserbtn')
-    _.newupload = view.find('#newupload')
     _.dlarea = view.find('#dlarea')
 }
 function initroute(content, contentroot) {
     delete _['text']
     _.filename.hide()
     _.btns.hide()
-    _.newupload.hide()
     _.deletebtn.hide()
 
     updown.download(content, progress.bind(this), downloaded.bind(this))
@@ -65,9 +63,7 @@ function downloaded(fileinfo, data) {
     _.filename.show()
     _.btns.show()
 
-    if (_.calledByUpload) _.newupload.show()
-
-    if (config.downloadautomatically && !_.calledByUpload) {
+    if (config.downloadautomatically) {
         _.dlbtn.click() 
         _.dlbtn.text("Download again")
     }
@@ -78,7 +74,6 @@ function progress(e) {
         _.loading.text('Decrypting')
     } else if (e == 'error') {
       _.loading.text('File not found or corrupt')
-      _.newupload.show()
       _.dlbtn.hide()
     } else {
         var text = ''
@@ -93,13 +88,6 @@ function progress(e) {
 }
 
 (function () {
-    _.calledByUpload = false
-    if (window.location.href.endsWith("&")) {
-        console.log("called by upload!")
-        window.location.replace(window.location.href.slice(0, -1))
-        _.calledByUpload = true
-    }
-
   var view = $('body')
   render(view)
 

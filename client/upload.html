@@ -18,6 +18,7 @@
 <body>
     <div class="topbar">
         <a class="btn flexele" href="/admin">Admin</a>
+        <a class="btn flexele" href="/">New upload</a>
     </div>
     <div class="contentarea" id="uploadview">
         <div class="centerview flexele">
@@ -44,14 +45,17 @@
             <button class="btn bigcenterbutton" id="uploadreally" type="button">Upload!</button>
             <div class="flexele row">Files:</div>
             <div class="flexele" id="filenames"></div>
-            
+        </div>
+        <div class="flexele" id="uploaddone">
+            <div class="flexele row">Upload done. Secret link:<a class="flexele row" id="uploaddonea">link</a></div>
+            <div class="flexele row" id="uploaddoneclip">Link copied to clipboard!</div>
         </div>
         <div class="boxarea flexele hidden" id="uploadprogress"> 
             <h1 id="progresstype">type</h1>
             <h1 id="progressamount">amount</h1>
             <div id="progressamountbg"></div>
         </div>
-</div>',
+    </div>
 
     <noscript class="noscript">
         <h2>

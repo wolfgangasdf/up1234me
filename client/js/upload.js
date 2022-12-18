@@ -65,7 +65,12 @@ function render(view) {
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
     _.viewercandelete = view.find('#viewercandeleteup')
+    _.uploaddone = view.find('#uploaddone')
+    _.uploaddonea = view.find('#uploaddonea')
+    _.uploaddoneclip = view.find('#uploaddoneclip')
     $('#uploadreally').hide()
+    _.progress.main.hide()
+    _.uploaddone.hide()
 }
 
 function initpastecatcher() {
@@ -125,7 +130,7 @@ function doupload(blob) {
 
 // called if "upload" botton clicked
 function douploadreally() {
-    _.progress.main.removeClass('hidden')
+    _.progress.main.show()
     _.progress.type.text('Encrypting')
     _.progress.bg.css('width', 0)
     _.metadata = {
@@ -152,15 +157,20 @@ function uploaded(data, response) {
         _.progress.type.text("Error")
         _.progress.amount.text(response.error)
     } else {
+        _.progress.main.hide()
+        $('#uploadreally').hide()
         let locrel = 'd/#' + data.seed
         console.log("location: ", window.location + locrel)
+        _.uploaddone.show()
+        var ele = document.getElementById('uploaddonea')
+        ele.href = window.location + locrel
+        ele.textContent = window.location + locrel
         navigator.clipboard.writeText(window.location + locrel).then(function() { // need to wait until finished!
             console.log('Copying to clipboard was successful!');
-            window.location = locrel + "&" // this indicates download.js that called from here!
         }, function(err) {
             console.error('Could not copy text to clipboard: ', err);
-            window.location = locrel + "&"
-          });
+            _.uploaddoneclip.hide()
+        });
     }
     // TODO
     // if (window.location.hash == '#noref') {
