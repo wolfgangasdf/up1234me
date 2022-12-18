@@ -69,7 +69,6 @@ function render(view) {
     _.description = view.find('#description')
     _.expirydays = view.find('#expirydays')
     _.viewercandelete = view.find('#viewercandeleteup')
-    $('#footer').show()
 }
 
 function initroute() {

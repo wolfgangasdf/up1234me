@@ -24,35 +24,13 @@ function render(view) {
     _.btns = view.find('#btnarea')
     _.deletebtn = view.find('#deletebtn')
     _.dlbtn = view.find('#dlbtn')
-    _.nextbtn = view.find('#nextbtn')
-    _.prevbtn = view.find('#prevbtn')
     _.viewbtn = view.find('#inbrowserbtn')
     _.newupload = view.find('#newupload')
     _.dlarea = view.find('#dlarea')
     $(document).on('click', '#deletebtn', deleteupload.bind(this))
-    $('#footer').hide()
 }
 function initroute(content, contentroot) {
     contentroot = contentroot ? contentroot : content
-    _.nextbtn.hide()
-    _.prevbtn.hide()
-    if (contentroot.indexOf('&') > -1) {
-      var which = 0
-      var values = contentroot.split('&')
-      var howmany = values.length
-      if (content != contentroot) {
-        which = parseInt(content) - 1
-      }
-      content = values[which]
-      _.nextbtn.attr('href', '#' + contentroot + '/' + (which + 2))
-      _.prevbtn.attr('href', '#' + contentroot + '/' + (which))
-      if (!(which >= howmany - 1)) {
-        _.nextbtn.show()
-      }
-      if (!(which <= 0)) {
-        _.prevbtn.show()
-      }
-    }
     console.log("contentroot=", contentroot)
     delete _['text']
     _.filename.hide()
