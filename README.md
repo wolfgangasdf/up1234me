@@ -31,6 +31,9 @@ For the web application configuration, a `config.js.example` file is provided, c
 
 `go build && ./up1234me`
 
+=== used ===
+* [client-zip](https://github.com/Touffy/client-zip) via https://cdn.jsdelivr.net/npm/client-zip/index.js
+* 
 
 How it works
 ---

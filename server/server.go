@@ -43,7 +43,6 @@ type Metadata struct {
 	Downloadcount   int
 	FileDate        time.Time `json:",omitempty"`
 	FileSize        int64     `json:",omitempty"`
-	FileName        string    `json:",omitempty"`
 }
 
 type FileInfo struct {
@@ -281,7 +280,6 @@ func loadMetadata(identPath string) (Metadata, error) {
 	if ifile, err := os.Stat(identPath); err == nil {
 		md.FileDate = ifile.ModTime()
 		md.FileSize = ifile.Size()
-		md.FileName = ifile.Name()
 	}
 	if md.Expirydays > 0 {
 		md.DaysUntilExpiry = md.Expirydays - int(time.Since(md.FileDate).Hours()/24)

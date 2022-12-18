@@ -57,7 +57,7 @@ function downloaded(fileinfo, data) {
         _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
     }
 
-    _.newupload.show()
+    if (config.downloadshowuploadbutton) _.newupload.show()
 
     var decrypted = new Blob([data.decrypted], { type: data.header.mime })
 
