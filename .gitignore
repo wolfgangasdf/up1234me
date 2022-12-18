@@ -2,4 +2,5 @@ i/
 server.conf
 config.js
 *.htpasswd
-up1234me
+up1234me*
+bindata.go

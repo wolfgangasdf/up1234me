@@ -12,6 +12,8 @@ Changes compared to Up1
 * unencrypted metadata: description, expiry, viewercandelete
 * copies url to clipboard after upload
 * a basic admin interface (not finished)
+* single binary thans to go-bindata
+
 
 Getting started
 ===
@@ -22,16 +24,26 @@ Getting started
 * make reverse SSL proxy
 * run `./up1234me`
 
+
 Build
 ===
+
+Prepare static bindata (to have single executable)
+---
+```
+go get -u github.com/go-bindata/go-bindata/v3/... 
+# one of:
+go-bindata        -fs -prefix "client/" client/...      # put static files into bindata.go
+go-bindata -debug -fs -prefix "client/" client/... # development: use normal files via bindata.go
+```
+
 Cross-build
-==
+---
 `GOOS=linux GOARCH=amd64 go build -o up1234me-linux-amd64`
 
 Build and run
-==
+---
 `go build && ./up1234me`
-
 
 
 Used libraries

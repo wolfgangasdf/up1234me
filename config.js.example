@@ -1,0 +1,2 @@
+export const downloadautomatically = true // initiate download automatically?
+export const downloadshowuploadbutton = false // show new upload button on download page

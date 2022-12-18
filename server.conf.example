@@ -1,0 +1,12 @@
+{
+  "maximum_file_size": 50000000,
+
+  "path": {
+    "i": "/i",
+    "client": "/client"
+  },
+
+  "http": {
+    "listen": "127.0.0.1:80"
+  }
+}
