@@ -8,7 +8,6 @@ import * as config from "../config.js"
 var _ = {}
 
 function render(view) {
-    _ = {}
     _.view = view
     _.detailsarea = view.find('#downloaddetails')
     _.loading = view.find('#downloadprogress')
@@ -22,11 +21,8 @@ function render(view) {
     _.viewbtn = view.find('#inbrowserbtn')
     _.newupload = view.find('#newupload')
     _.dlarea = view.find('#dlarea')
-    $(document).on('click', '#deletebtn', deleteupload.bind(this))
 }
 function initroute(content, contentroot) {
-    contentroot = contentroot ? contentroot : content
-    console.log("contentroot=", contentroot)
     delete _['text']
     _.filename.hide()
     _.btns.hide()
@@ -49,8 +45,6 @@ function downloaded(fileinfo, data) {
         _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
     }
 
-    if (config.downloadshowuploadbutton) _.newupload.show()
-
     var decrypted = new Blob([data.decrypted], { type: data.header.mime })
 
     var safedecrypted = new Blob([decrypted], { type: data.header.mime })
@@ -70,14 +64,13 @@ function downloaded(fileinfo, data) {
 
     _.filename.show()
     _.btns.show()
-    if (config.downloadautomatically) {
+
+    if (_.calledByUpload) _.newupload.show()
+
+    if (config.downloadautomatically && !_.calledByUpload) {
         _.dlbtn.click() 
         _.dlbtn.text("Download again")
     }
-}
-function deleteupload() {
-    console.log("delete upload: clear cache!")
-    updown.cachedelete()
 }
 
 function progress(e) {
@@ -100,10 +93,17 @@ function progress(e) {
 }
 
 (function () {
+    _.calledByUpload = false
+    if (window.location.href.endsWith("&")) {
+        console.log("called by upload!")
+        window.location.replace(window.location.href.slice(0, -1))
+        _.calledByUpload = true
+    }
+
   var view = $('body')
   render(view)
 
-  console.log("location: " + window.location.hash, window.location)
+  console.log("location: " + window.location.hash, " win: ", window, document['variab'])
   initroute(window.location.hash.substring(1))
 
 }())

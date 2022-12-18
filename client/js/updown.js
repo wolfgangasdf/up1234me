@@ -1,7 +1,5 @@
 import * as config from "../config.js"
 
-var cached = {}
-var cached_seed = {}
 var requestframe = {}
 
 function init() {
@@ -29,7 +27,6 @@ function downloaded(seed, progress, done, response) {
     if (response.target.status != 200) {
       onerror(progress)
     } else {
-      cache(seed, response.target.response)
       var fi = response.target.getResponseHeader("Fileinfo")
       if (!fi) {
         console.log("error reading file info")
@@ -62,26 +59,11 @@ function uploadencrypted(metadata, progress, done, data) {
         type: 'POST'
     }).done(done.bind(undefined, data))
 }
-function cache(seed, data) { // TODO remove? But after upload, it does download and decrypt immediately...
-  cached = data
-  cached_seed = seed
-}
-export function cachedelete() {
-  cache({}, {})
-}
-function cacheresult(data) {
-  cache(data.seed, data.encrypted)
-}
 export function download(seed, progress, done) {
-    if (cached_seed == seed) {
-      progress('decrypting')
-      crypt.decrypt(cached, seed).done(done).progress(progress)
-    } else {
-      crypt.ident(seed).done(downloadfromident.bind(this, seed, progress, done))
-    }
+    crypt.ident(seed).done(downloadfromident.bind(this, seed, progress, done))
 }
 export function upload(blob, metadata, progress, done) {
-  crypt.encrypt(blob).done(uploadencrypted.bind(this, metadata, progress, done)).done(cacheresult.bind(this)).progress(progress)
+  crypt.encrypt(blob).done(uploadencrypted.bind(this, metadata, progress, done)).progress(progress)
 }
 
 (function () {

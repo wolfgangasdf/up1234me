@@ -19,10 +19,11 @@ Getting started
 ===
 * download an executable of `up1234me` or compile (below)
 * create `server.conf` based on [server.conf.example](server.conf.example)
-  * run locally and use reverse SSL proxy for https!
+  * create folder "i" where the files are stored with access for webapp user
+  * listen only locally and use reverse SSL proxy for https!
 * create `config.js` based on [config.js.example](config.js.example)
 * create http basic auth file in the `server` folder: `htpasswd -c server.htpasswd <username>`
-* run `./up1234me`
+* run (as webapp) `./up1234me`
 
 
 Build

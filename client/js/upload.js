@@ -153,12 +153,13 @@ function uploaded(data, response) {
         _.progress.amount.text(response.error)
     } else {
         let locrel = 'd/#' + data.seed
-        navigator.clipboard.writeText(window.location + locrel).then(function() {
+        console.log("location: ", window.location + locrel)
+        navigator.clipboard.writeText(window.location + locrel).then(function() { // need to wait until finished!
             console.log('Copying to clipboard was successful!');
-            window.location = locrel
-          }, function(err) {
+            window.location = locrel + "&" // this indicates download.js that called from here!
+        }, function(err) {
             console.error('Could not copy text to clipboard: ', err);
-            window.location = locrel
+            window.location = locrel + "&"
           });
     }
     // TODO
@@ -192,6 +193,9 @@ function pasted(e) {
 }
 
 (function () {
+    if (window.location.href.endsWith("#")) {
+        window.location.replace(window.location.href.slice(0, -1))
+    }
     var view = $('body')
     render(view)
     init()
