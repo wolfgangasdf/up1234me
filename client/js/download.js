@@ -75,6 +75,7 @@ function progress(e) {
     } else if (e == 'error') {
       _.loading.text('File not found or corrupt')
       _.dlbtn.hide()
+      _.viewbtn.hide()
     } else {
         var text = ''
         if (e.eventsource != 'encrypt') {

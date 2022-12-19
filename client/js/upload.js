@@ -68,9 +68,11 @@ function render(view) {
     _.uploaddone = view.find('#uploaddone')
     _.uploaddonea = view.find('#uploaddonea')
     _.uploaddoneclip = view.find('#uploaddoneclip')
+    _.deletebtn = view .find('#deletebtn')
     $('#uploadreally').hide()
     _.progress.main.hide()
     _.uploaddone.hide()
+    _.deletebtn.hide()
 }
 
 function initpastecatcher() {
@@ -159,6 +161,7 @@ function uploaded(data, response) {
     } else {
         _.progress.main.hide()
         $('#uploadreally').hide()
+        _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
         let locrel = 'd/#' + data.seed
         console.log("location: ", window.location + locrel)
         _.uploaddone.show()
