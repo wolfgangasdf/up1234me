@@ -196,3 +196,8 @@ a {
   -ms-transform: scale(2.0) translateX(-50%);
   transform: scale(2.0) translateX(-50%);
 }
+
+#filelist tr:nth-child(even)
+{
+  background: rgb(72, 72, 72);
+}

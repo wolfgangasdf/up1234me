@@ -43,9 +43,21 @@ type Metadata struct {
 	Downloadcount   int
 	FileDate        time.Time `json:",omitempty"`
 	FileSize        int64     `json:",omitempty"`
+	FileName        string    `json:",omitempty"`
 }
 
-type FileInfo struct {
+func (d *Metadata) MarshalJSON() ([]byte, error) { // format date https://stackoverflow.com/a/35744769
+	type Alias Metadata
+	return json.Marshal(&struct {
+		*Alias
+		FileDate string `json:",omitempty"`
+	}{
+		Alias:    (*Alias)(d),
+		FileDate: d.FileDate.Format("02-Jan-2006 15:04:05"),
+	})
+}
+
+type FileInfo struct { // for download, not authenticated: only safe info
 	Description     string
 	DaysUntilExpiry int
 	ViewerCanDelete bool
@@ -116,6 +128,7 @@ func download(w http.ResponseWriter, r *http.Request) {
 
 func savaMetadata(identPath string, md Metadata) error {
 	metaPath := identPath + ".json"
+	// should erase unneeded fields from md, can't be done currently.
 	metaContent, err := json.Marshal(md)
 	if err != nil {
 		return err
@@ -133,18 +146,16 @@ type AdminInfo struct {
 }
 
 type AdminFileList struct {
-	FileList []Metadata
+	FileList   []Metadata
+	TotalSize  int64
+	TotalFiles int
 }
 
 func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	r := ar.Request
-	fmt.Println("admin: url=" + r.URL.Path)
+	fmt.Println("admin: url=" + r.URL.Path + " query=" + r.URL.RawQuery)
 	if r.URL.Path == "/admin/" {
 		serveFileAsset(w, "admin.html")
-		return
-	} else if r.URL.Path == "/admin/get_info" {
-		msg, _ := json.Marshal(&AdminInfo{Totalfilecount: 123, Totalsize: 321}) // TODO
-		w.Write(msg)
 		return
 	} else if r.URL.Path == "/admin/get_files" {
 		fmt.Println("admin: get_file: " + r.FormValue("startindex"))
@@ -153,7 +164,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		afl := &AdminFileList{FileList: []Metadata{}}
+		afl := &AdminFileList{FileList: []Metadata{}, TotalSize: 0, TotalFiles: 0}
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), ".json") {
 				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
@@ -162,6 +173,8 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 					log.Fatal(err)
 				}
 				afl.FileList = append(afl.FileList, md)
+				afl.TotalFiles++
+				afl.TotalSize += md.FileSize
 			}
 		}
 		msg, _ := json.Marshal(afl)
@@ -169,8 +182,12 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		return
 	} else if r.URL.Path == "/admin/delete_all_before" {
 		// TODO
-	} else if r.URL.Path == "/admin/delete_file" {
-		// TODO
+	} else if r.URL.Path == "/admin/delete_file" { // delete_file?filename
+		ident := r.URL.RawQuery
+		if ident != "" {
+			identPath := path.Join(config.Path.I, ident)
+			deletefile(identPath, false)
+		}
 	}
 }
 
@@ -300,6 +317,7 @@ func loadMetadata(identPath string) (Metadata, error) {
 	if ifile, err := os.Stat(identPath); err == nil {
 		md.FileDate = ifile.ModTime()
 		md.FileSize = ifile.Size()
+		md.FileName = ifile.Name()
 	}
 	if md.Expirydays > 0 {
 		md.DaysUntilExpiry = md.Expirydays - int(time.Since(md.FileDate).Hours()/24)

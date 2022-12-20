@@ -22,7 +22,7 @@ Getting started
   * create folder "i" where the files are stored with access for webapp user
 * create `config.js` based on [config.js.example](config.js.example)
 * create http basic auth file in the `server` folder: `htpasswd -c server.htpasswd <username>`
-* run (as webapp) `./up1234me` or `./up1234me-linux-amd64`
+* run (as webapp user) `./up1234me` or `./up1234me-linux-amd64`
 * use a reverse proxy for https!
 
 
