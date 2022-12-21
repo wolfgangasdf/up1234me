@@ -21,8 +21,9 @@ import (
 )
 
 type Config struct {
-	Listen      string `json:"listen"`
-	MaxFileSize int64  `json:"maximum_file_size"`
+	Listen         string `json:"listen"`
+	MaxFileSize    int64  `json:"maximum_file_size"`
+	MaxStorageSize int64  `json:"maximum_storage_size"`
 
 	Path struct {
 		I string `json:"i"`
@@ -73,20 +74,23 @@ type SuccessMessage struct {
 }
 
 func readConfig(name string) Config {
-	file, _ := os.Open(name)
+	file, err := os.Open(name)
+	if err != nil {
+		log.Fatal("Error reading config: ", err)
+	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	config := Config{}
-	err := decoder.Decode(&config)
+	err = decoder.Decode(&config)
 	if err != nil {
-		fmt.Println("Error reading config: ", err)
+		log.Fatal("Error reading config: ", err)
 	}
 	return config
 }
 
 func validateConfig(config Config) {
 	if len(config.Path.I) == 0 {
-		config.Path.I = "../i"
+		log.Fatal("server.conf doesn't contain i")
 	}
 }
 
@@ -162,7 +166,8 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 
 		files, err := os.ReadDir(config.Path.I)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		afl := &AdminFileList{FileList: []Metadata{}, TotalSize: 0, TotalFiles: 0}
 		for _, file := range files {
@@ -170,7 +175,8 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
 				md, err := loadMetadata(identPath)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
+					return
 				}
 				afl.FileList = append(afl.FileList, md)
 				afl.TotalFiles++
@@ -180,8 +186,6 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		msg, _ := json.Marshal(afl)
 		w.Write(msg)
 		return
-	} else if r.URL.Path == "/admin/delete_all_before" {
-		// TODO
 	} else if r.URL.Path == "/admin/delete_file" { // delete_file?filename
 		ident := r.URL.RawQuery
 		if ident != "" {
@@ -193,6 +197,26 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 
 func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	fmt.Println("upload: url=" + r.Request.URL.Path)
+
+	// check TotalSize
+	start := time.Now()
+	totalSize := int64(0)
+	files, err := os.ReadDir(config.Path.I)
+	if err != nil {
+		log.Println("Error opening I:", err, " path: ", config.Path.I)
+		return
+	}
+	for _, file := range files {
+		inf, _ := file.Info()
+		totalSize += inf.Size()
+	}
+	log.Printf("folder size took %s", time.Since(start))
+	if totalSize > config.MaxStorageSize {
+		msg, _ := json.Marshal(&ErrorMessage{Error: "Storage size " + fmt.Sprintf("%d", config.MaxStorageSize) + " exceeded", Code: 1})
+		w.Write(msg)
+		return
+	}
+
 	if r.ContentLength > config.MaxFileSize {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "File size too large", Code: 1})
 		w.Write(msg)
@@ -268,12 +292,12 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 func deletefile(identPath string, ignoreerrors bool) {
 	if err := os.Remove(identPath); err != nil {
 		if !ignoreerrors {
-			panic(err)
+			log.Println(err)
 		}
 	}
 	if err := os.Remove(identPath + ".json"); err != nil {
 		if !ignoreerrors {
-			panic(err)
+			log.Println(err)
 		}
 	}
 }
@@ -344,7 +368,7 @@ func indexi(w http.ResponseWriter, r *http.Request) {
 	fi := FileInfo{Description: md.Description, DaysUntilExpiry: md.DaysUntilExpiry, ViewerCanDelete: md.Viewercandelete, DownloadCount: md.Downloadcount}
 	jsonstring, err := json.Marshal(fi)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	w.Header().Add("Fileinfo", string(jsonstring))
 
@@ -357,13 +381,13 @@ func expire() {
 		fmt.Println("expire: reading directory content...")
 		files, err := os.ReadDir(config.Path.I)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		var iii = 0
 		for _, file := range files {
-			if !strings.HasSuffix(file.Name(), ".json") {
+			if strings.HasSuffix(file.Name(), ".json") {
 				iii++
-				identPath := filepath.Join(config.Path.I, file.Name())
+				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
 				if iii%int(math.Ceil(float64(len(files))/10.0)) == 0 {
 					fmt.Println("expire: checking " + identPath)
 				}
