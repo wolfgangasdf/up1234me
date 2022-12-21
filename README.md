@@ -1,4 +1,5 @@
-Up1234me: A client-side encrypted file host based on [Up1](https://github.com/Upload/Up1). It is my personal dropbox for sensitive files.
+Up1234me: A client-side encrypted file host based on [Up1](https://github.com/Upload/Up1). It is my personal dropbox for sensitive files. Basically, the random private key after `#` in the URL is used for encryption in the browser (javascript), and it is never sent to the server.
+
 
 Changes compared to Up1
 ===
@@ -13,6 +14,7 @@ Changes compared to Up1
 * copies url to clipboard after upload
 * a basic admin interface (not finished)
 * single binary thanks to go-bindata
+* maximum total storage size
 
 
 Getting started
