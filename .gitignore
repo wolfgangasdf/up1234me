@@ -1,4 +1,5 @@
-storage/
+storage/*
+!storage/.placeholder
 server.conf
 config.js
 server.htpasswd
