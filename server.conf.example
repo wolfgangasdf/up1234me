@@ -1,12 +1,6 @@
 {
+  "listen": ":80"
   "maximum_file_size": 50000000,
   "maximum_storage_size": 2000000000,
-
-  "path": {
-    "i": "./i"
-  },
-
-  "http": {
-    "listen": "127.0.0.1:80"
-  }
+  "storage_path": "./storage"
 }

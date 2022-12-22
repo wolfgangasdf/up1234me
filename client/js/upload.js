@@ -1,6 +1,5 @@
 
 import "./loadencryption.js"
-import * as config from "../config.js"
 import * as updown from "./updown.js"
 import "./shims.js"
 import "../deps/zepto.min.js"
@@ -31,7 +30,6 @@ function dragleave(e) {
 }
 
 function drop(e) {
-    console.log("dropped!!!")
     e.preventDefault()
     _.pastearea.removeClass('dragover')
     douploadmultiple(e.dataTransfer.files)
@@ -109,7 +107,6 @@ function progress(e) {
 
 function douploadmultiple(files) {
     for (var i = 0; i < files.length; i++) {
-        console.log("files[" + i + "]=" + files[i])
         doupload(files[i])
     }    
 }
@@ -163,7 +160,6 @@ function uploaded(data, response) {
         $('#uploadreally').hide()
         _.deletebtn.show().prop('href', "http://" + window.location.host + '/del?ident=' + data.ident)
         let locrel = 'd/#' + data.seed
-        console.log("location: ", window.location + locrel)
         _.uploaddone.show()
         var ele = document.getElementById('uploaddonea')
         ele.href = window.location + locrel
@@ -175,27 +171,16 @@ function uploaded(data, response) {
             _.uploaddoneclip.hide()
         });
     }
-    // TODO
-    // if (window.location.hash == '#noref') {
-    //     history.replaceState(undefined, undefined, '#' + data.seed)
-    //     // route.setroute(download, undefined, data.seed)
-    // } else {
-    // }
-
 }
 function pasted(e) {
     console.log("pasted!!!")
     if (!_ || _.pastearea.hasClass('hidden')) {
         return
     }
-
     var items = e.clipboardData.items
-
     if (typeof items != 'undefined' && items.length >= 1) {
         e.preventDefault()
-
         for (var i = 0; i < items.length; i++) {
-            console.log("items[" + i + "]=" + items[i])
             var blob = items[i].getAsFile()
             if (blob) {
                 doupload(blob)

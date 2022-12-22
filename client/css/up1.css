@@ -106,6 +106,9 @@ a {
 
 #pastearea {
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
 }
 
 #pastearea.dragover {

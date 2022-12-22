@@ -1,30 +1,29 @@
-Up1234me: A client-side encrypted file host based on [Up1](https://github.com/Upload/Up1). It is my personal dropbox for sensitive files. Basically, the random private key after `#` in the URL is used for encryption in the browser (javascript), and it is never sent to the server.
+Up1234me: A client-side encrypted file host based on [Up1](https://github.com/Upload/Up1). It is my personal dropbox for sensitive files. Basically, the random private key after `#` in the URL is used for encryption and decryption in the browser (javascript), and it is never sent to the server. See [Up1](https://github.com/Upload/Up1) for details.
 
 
 Changes compared to Up1
 ===
-* http basic authentication for upload and admin
 * it's for generic files which are now previewed in the browser
+* http basic authentication for upload and admin
 * files can be automatically downloaded if link opened
 * multiple-file uploads, which are zipped
-* simpler js, html, and css code (separate html)
+* simpler js, html, and css code
 * upload expiry, runs every day
 * uploads can be deleted by viewer if uploader has allowed it
 * unencrypted metadata: description, expiry, viewercandelete
 * copies url to clipboard after upload
 * a basic admin interface (not finished)
 * single binary thanks to go-bindata
-* maximum total storage size
+* limit total storage size
 
 
 Getting started
 ===
-* download an executable of `up1234me` or build yourselves (below)
-* create `server.conf` based on [server.conf.example](server.conf.example)
-  * create folder "i" where the files are stored with access for webapp user
+* download an executable of `up1234me` or build yourselves (below), then do in the same folder:
 * create `config.js` based on [config.js.example](config.js.example)
 * create http basic auth file in the `server` folder: `htpasswd -c server.htpasswd <username>`
-* run (as webapp user) `./up1234me` or `./up1234me-linux-amd64`
+* create `server.conf` based on [server.conf.example](server.conf.example) and create the writable folder "storage_path"
+* run (as webapp user) `./up1234me-linux-amd64` or so.
 * use a reverse proxy for https!
 
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"mime"
 	"net/http"
 	"os"
@@ -24,14 +23,7 @@ type Config struct {
 	Listen         string `json:"listen"`
 	MaxFileSize    int64  `json:"maximum_file_size"`
 	MaxStorageSize int64  `json:"maximum_storage_size"`
-
-	Path struct {
-		I string `json:"i"`
-	} `json:"path"`
-
-	Http struct {
-		Listen string `json:"listen"`
-	} `json:"http"`
+	StoragePath    string `json:"storage_path"`
 }
 
 var config Config
@@ -89,8 +81,8 @@ func readConfig(name string) Config {
 }
 
 func validateConfig(config Config) {
-	if len(config.Path.I) == 0 {
-		log.Fatal("server.conf doesn't contain i")
+	if len(config.Listen) == 0 || len(config.StoragePath) == 0 || config.MaxFileSize <= 0 || config.MaxStorageSize <= 0 {
+		log.Fatal("server.conf error")
 	}
 }
 
@@ -98,7 +90,6 @@ func validateConfig(config Config) {
 func serveFileAsset(w http.ResponseWriter, pathBelowClient string) {
 	fmt.Println("serveFileAsset: " + pathBelowClient)
 	mimeType := mime.TypeByExtension(filepath.Ext(pathBelowClient))
-	// fmt.Println("mime: ", mimeType)
 	b, err := Asset("client/" + pathBelowClient)
 	if err != nil {
 		log.Println(err)
@@ -162,9 +153,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		serveFileAsset(w, "admin.html")
 		return
 	} else if r.URL.Path == "/admin/get_files" {
-		fmt.Println("admin: get_file: " + r.FormValue("startindex"))
-
-		files, err := os.ReadDir(config.Path.I)
+		files, err := os.ReadDir(config.StoragePath) // TODO should be sorted...
 		if err != nil {
 			log.Println(err)
 			return
@@ -172,7 +161,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		afl := &AdminFileList{FileList: []Metadata{}, TotalSize: 0, TotalFiles: 0}
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), ".json") {
-				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
+				identPath := filepath.Join(config.StoragePath, strings.TrimSuffix(file.Name(), ".json"))
 				md, err := loadMetadata(identPath)
 				if err != nil {
 					log.Println(err)
@@ -189,7 +178,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	} else if r.URL.Path == "/admin/delete_file" { // delete_file?filename
 		ident := r.URL.RawQuery
 		if ident != "" {
-			identPath := path.Join(config.Path.I, ident)
+			identPath := path.Join(config.StoragePath, ident)
 			deletefile(identPath, false)
 		}
 	}
@@ -201,9 +190,9 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	// check TotalSize
 	start := time.Now()
 	totalSize := int64(0)
-	files, err := os.ReadDir(config.Path.I)
+	files, err := os.ReadDir(config.StoragePath)
 	if err != nil {
-		log.Println("Error opening I:", err, " path: ", config.Path.I)
+		log.Println("Error opening I:", err, " path: ", config.StoragePath)
 		return
 	}
 	for _, file := range files {
@@ -241,7 +230,7 @@ func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		return
 	}
 
-	identPath := path.Join(config.Path.I, path.Base(ident))
+	identPath := path.Join(config.StoragePath, path.Base(ident))
 	if _, err := os.Stat(identPath); err == nil {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "Ident is already taken.", Code: 4})
 		w.Write(msg)
@@ -312,7 +301,7 @@ func delfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	identPath := path.Join(config.Path.I, ident)
+	identPath := path.Join(config.StoragePath, ident)
 	if _, err := os.Stat(identPath); os.IsNotExist(err) {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "Ident does not exist.", Code: 9})
 		w.Write(msg)
@@ -356,12 +345,12 @@ func loadMetadata(identPath string) (Metadata, error) {
 
 func indexi(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("indexi: " + r.URL.Path)
-	identPath := filepath.Join(config.Path.I, r.URL.Path[2:])
+	identPath := filepath.Join(config.StoragePath, r.URL.Path[2:])
 	md, err := loadMetadata(identPath)
 	if err != nil {
 		msg, _ := json.Marshal(&ErrorMessage{Error: "Error loading metadata", Code: 30})
 		w.Write(msg)
-		return // TODO test this, does client receive error?
+		return
 	}
 	md.Downloadcount++
 	savaMetadata(identPath, md)
@@ -379,21 +368,16 @@ func expire() {
 	time.Sleep(10 * time.Second)
 	for {
 		fmt.Println("expire: reading directory content...")
-		files, err := os.ReadDir(config.Path.I)
+		files, err := os.ReadDir(config.StoragePath)
 		if err != nil {
 			log.Println(err)
 		}
-		var iii = 0
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), ".json") {
-				iii++
-				identPath := filepath.Join(config.Path.I, strings.TrimSuffix(file.Name(), ".json"))
-				if iii%int(math.Ceil(float64(len(files))/10.0)) == 0 {
-					fmt.Println("expire: checking " + identPath)
-				}
+				identPath := filepath.Join(config.StoragePath, strings.TrimSuffix(file.Name(), ".json"))
 				md, err := loadMetadata(identPath)
 				if err != nil {
-					fmt.Println("expire: error loading metadata for " + identPath)
+					log.Println("expire: error loading metadata for " + identPath)
 				} else {
 					if md.DaysUntilExpiry == 0 {
 						fmt.Println("expire: delete " + identPath)
@@ -431,15 +415,15 @@ func main() {
 	http.HandleFunc("/config.js", index)
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
-		log.Printf("Starting HTTP server on %s\n", config.Http.Listen)
-		log.Println(http.ListenAndServe(config.Http.Listen, nil))
+		log.Printf("Starting HTTP server on %s\n", config.Listen)
+		log.Fatal("Error: ", http.ListenAndServe(config.Listen, nil))
 	}()
 
-	go expire() // run in goroutine
+	go expire() // run in parallel
 
 	wg.Wait()
 }

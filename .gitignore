@@ -1,6 +1,6 @@
-i/
+storage/
 server.conf
 config.js
-*.htpasswd
+server.htpasswd
 up1234me*
 bindata.go
