@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <link rel="shortcut icon" href="./favicon/16px.png" sizes="16x16" type="image/png">
+    <link rel="shortcut icon" href="./favicon/32px.png" sizes="32x32" type="image/png">
+    <link rel="shortcut icon" href="./favicon/64px.png" sizes="64x64" type="image/png">
+    <link rel="shortcut icon" href="./favicon/128px.png" sizes="128x128" type="image/png">
+    <title>Up1234me</title>
+    <link rel="stylesheet" href="./css/up1.css">
+    <script>
+        window.onunload = function () { }
+    </script>
+</head>
+
+<body>
+    <div class="topbar" id="topbar">
+        <button class="btn flexele" id="deletebtn" type="button">Delete</button>
+        <a class="btn flexele" href="/admin">Admin</a>
+        <a class="btn flexele" href="/">New upload</a>
+    </div>
+    <noscript class="noscript">
+        <h2>The client side cryptography of this application requires that Javascript is enabled.</h2>
+    </noscript>
+    <div class="contentarea" id="uploadview">
+        <div class="centerview flexele" id="uploadarea">
+            <div id="pastearea" class="boxarea">
+                <h1 title="paste, drop or click!">Upload</h1>
+            </div>
+            <form>
+                <input type="file" id="filepicker" class="hidden" />
+            </form>
+        </div>
+        <div class="flexele" id="beforeupload">
+            <div class="flexele row">Description (unencrypted):<input id="description" type="text" size="50" class="inputthings" /></div>
+            <div class="flexele row">Expiry in days:<input id="expirydays" type="number" list="expirydayslist" placeholder="30" step="10" min="1"
+                max="100000" class="inputthings" />
+                <datalist id="expirydayslist">
+                    <option>1</option>
+                    <option>7</option>
+                    <option>30</option>
+                    <option selected>60</option>
+                    <option>90</option>
+                    <option>150</option>
+                    <option>365</option>
+                </datalist>
+            </div>
+            <div class="flexele row">Viewer can delete:<input id="viewercandeleteup" type="checkbox" checked /></div>
+            <button class="btn flexele row bigcenterbutton" id="uploadreally" type="button">Upload!</button>
+            <div class="flexele row">Files:</div>
+            <div class="flexele" id="filenames"></div>
+        </div>
+        <div class="flexele" id="uploaddone">
+            <div class="flexele row">Upload done. Secret link:<a class="flexele row" id="uploaddonea">link</a></div>
+            <div class="flexele row" id="uploaddoneclip">Link copied to clipboard!</div>
+        </div>
+        <div class="boxarea flexele" id="uploadprogress"> 
+            <h1 id="progresstype">type</h1>
+            <h1 id="progressamount">amount</h1>
+            <div id="progressamountbg"></div>
+        </div>
+    </div>
+    <div id="footer" class="footer">
+        <a href="https://github.com/wolfgangasdf/up1234me" target="_blank">Up1234me</a>
+    </div>
+    <script type="module" src="./js/upload.js"></script>
+</body>
+
+</html>

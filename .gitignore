@@ -1,0 +1,7 @@
+storage/*
+!storage/.placeholder
+server.conf
+config.js
+server.htpasswd
+up1234me*
+bindata.go

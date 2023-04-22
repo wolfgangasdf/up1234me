@@ -1,0 +1,1 @@
+export const downloadautomatically = true // initiate download automatically?

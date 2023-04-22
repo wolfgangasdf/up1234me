@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <link rel="shortcut icon" href="../favicon/16px.png" sizes="16x16" type="image/png">
+    <link rel="shortcut icon" href="../favicon/32px.png" sizes="32x32" type="image/png">
+    <link rel="shortcut icon" href="../favicon/64px.png" sizes="64x64" type="image/png">
+    <link rel="shortcut icon" href="../favicon/128px.png" sizes="128x128" type="image/png">
+    <title>Up1234me</title>
+    <link rel="stylesheet" href="../css/up1.css">
+    <script>
+        window.onunload = function () { }
+    </script>
+</head>
+
+<body>
+    <div class="topbar" id="topbar">
+        <a class="btn flexele" id="inbrowserbtn" target="_blank" href="#">View In Browser</a>
+        <button class="btn flexele" id="deletebtn" type="button">Delete</button>
+    </div>
+    <noscript class="noscript">
+        <h2>The client side cryptography of this application requires that Javascript is enabled.</h2>
+    </noscript>
+    <div class="contentarea" >
+        <div class="flexele row">Filename:<div id="downloaded_filename"></div></div>
+        <div class="flexele row">Description:<div id="description"></div></div>
+        <div class="flexele row">Days until expiry:<div id="daysuntilexpiry"></div></div>
+        <h1 id="downloadprogress" class="centertext flexele">Downloading</h1>
+    </div>
+    <a class="btn flexele row bigcenterbutton" id="dlbtn" href="#">Download</a>
+    <div id="preview" class="flexele row preview centerable"></div>
+    <div id="footer" class="footer">
+        <a href="https://github.com/wolfgangasdf/up1234me" target="_blank">Up1234me</a>
+    </div>
+    <script type="module" src="../js/download.js"></script>
+</body>
+
+</html>

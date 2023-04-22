@@ -1,0 +1,231 @@
+body {
+  position:absolute;
+  top:0px;
+  bottom:0px;
+  left:0px;
+  right:0px;
+  padding: 5px;
+  margin: 0;
+  background-color: #1d1f21;
+  font-family: Sans-Serif;
+}
+
+.topbar {
+  display: flex;
+  flex-direction: row-reverse;
+  height: 60px;
+}
+
+.contentarea {
+  display: flex;
+  flex-direction: column;
+  color: #CCC;
+}
+
+.flexele {
+  padding: 10px;
+  margin: 10px;
+}
+
+.row {
+  display: flex;
+  padding: 10px;
+  margin: 0px;
+  flex-direction: row;
+  font-size: larger;
+  font-weight: bold;
+  color: #AAA;
+  align-items:center;
+}
+.row div, input {
+  padding-left: 10px;
+  color: #DDD;
+}
+
+.footer {
+  bottom: 10px;
+  margin: auto;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  color: #FFF;
+}
+
+a {
+  color: #FFF;
+  font-size: 14px;
+  opacity: .5;
+  text-decoration: none;
+}
+
+.beforeupload {
+  text-align: left;
+}
+
+.btn {
+  background-color: rgba(0,0,0,.5);
+  border: 2px solid #FFF;
+  box-sizing: border-box;
+  color: #FFF!important;
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  height: 38px;
+  line-height: 16px;
+  opacity: .75;
+  text-align: center;
+  text-decoration: none;
+  transition: all 400ms ease-out;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.btn:not(:first-child):not(:last-child) {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+.btn:hover {
+  background-color: #313538;
+  opacity: 1;
+  transition: all 100ms ease-in;
+}
+
+#finallink,#downloadprogress {
+  color: #FFF;
+}
+
+#pastearea {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+#pastearea.dragover {
+  background-color: rgba(255,255,255,.2);
+}
+
+#pastearea:hover {
+  -moz-transition: background-color 100ms ease-in;
+  -ms-transition: background-color 100ms ease-in;
+  -o-transition: background-color 100ms ease-in;
+  -webkit-transition: background-color 100ms ease-in;
+  background-color: #313538;
+  transition: background-color 100ms ease-in;
+}
+
+#pastecatcher {
+  height: 0;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+
+#progressamountbg {
+  background-color: rgba(0,10,0,.5);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 0;
+  z-index: -1;
+}
+
+.boxarea {
+  border: 2px solid #FFF;
+  height: 200px;
+  width: 100%;
+  -moz-transition: background-color 400ms ease-out;
+  -ms-transition: background-color 400ms ease-out;
+  -o-transition: background-color 400ms ease-out;
+  -webkit-transition: background-color 400ms ease-out;
+  transition: background-color 400ms ease-out;
+  text-align: center;
+  border: 2px solid #FFF;
+}
+
+.inputthings {
+  color: #000;
+  font-size: 20px;
+  border-radius: 15px;
+  display: block;
+  padding:0 8px;
+  margin: 0 0 0 15px;
+}
+
+.hidden {
+  display: none!important;
+}
+
+.noscript {
+  color: #FFF;
+  margin: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.centertext {
+  text-align: center;
+}
+
+.right {
+  float: right;
+}
+
+#viewercandeleteup {
+  transform: scale(2.0);
+  padding: 10px;
+  margin: 0 0 0 25px;
+}
+
+#filelist th, td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 10px;
+}
+#filelist tr:nth-child(even)
+{
+  background: rgb(72, 72, 72);
+}
+
+#filelist tr td:nth-child(1), td:nth-child(3)
+{
+  text-align: center;
+}
+#filelist tr td:nth-child(4),
+#filelist tr td:nth-child(5),
+#filelist tr td:nth-child(6),
+#filelist tr td:nth-child(7),
+#filelist tr td:nth-child(8)
+{
+  text-align: right;
+}
+
+.bigcenterbutton {
+  display: block;
+  font-size: x-large;
+  font-weight: bold;
+  height: fit-content;
+  line-height: 1.2;
+}
+
+#uploadreally {
+  width: -moz-available;
+  width: -webkit-fill-available;
+  width: stretch;
+}
+
+#preview {
+  display: flex;
+  justify-content: center;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#preview img {
+  max-width: 90%;
+}
