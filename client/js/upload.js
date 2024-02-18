@@ -96,15 +96,15 @@ function triggerfocuspaste (e) {
 // this receives object from encryption.js, or ajax ProgressEvent, or error object from server
 function progress (e) {
   let showpercent = false
-  if (e.eventsource === 'encrypt') {
+  if (e.error != null) { 
+    _.progress.type.text('Error')
+    _.progress.amount.text(e.error)
+  } else if (e.eventsource === 'encrypt') {
     _.progress.type.text('Encrypting')
     showpercent = true
   } else if (e.constructor.name === 'ProgressEvent') {
     _.progress.type.text('Uploading')
     showpercent = true
-  } else if (e.error != null) { // error from server
-    _.progress.type.text('Error')
-    _.progress.amount.text(e.error)
   }
   if (showpercent) {
     const percent = (e.loaded / e.total) * 100

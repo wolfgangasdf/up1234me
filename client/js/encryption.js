@@ -21,18 +21,29 @@ function parameters (seed) {
 }
 
 function encrypt (file, seed, id) {
-  const params = parameters(seed)
-  const uarr = new Uint8Array(file)
-  const before = sjcl.codec.bytes.toBits(uarr)
-  const prp = new sjcl.cipher.aes(params.key)
-  const after = sjcl.mode.ccm.encrypt(prp, before, params.iv)
-  const afterarray = new Uint8Array(sjcl.codec.bytes.fromBits(after))
-  postMessage({
-    id,
-    seed: sjcl.codec.base64url.fromBits(params.seed),
-    ident: sjcl.codec.base64url.fromBits(params.ident),
-    encrypted: new Blob([afterarray], { type: 'application/octet-stream' })
-  })
+  try {
+    const params = parameters(seed)
+    const uarr = new Uint8Array(file)
+    const before = sjcl.codec.bytes.toBits(uarr)
+    const prp = new sjcl.cipher.aes(params.key)
+    const after = sjcl.mode.ccm.encrypt(prp, before, params.iv)
+    const afterarray = new Uint8Array(sjcl.codec.bytes.fromBits(after))
+    postMessage({
+      id,
+      seed: sjcl.codec.base64url.fromBits(params.seed),
+      ident: sjcl.codec.base64url.fromBits(params.ident),
+      encrypted: new Blob([afterarray], { type: 'application/octet-stream' })
+    })
+  } catch(error) {
+    console.log("encrypt error: ", error)
+    postMessage({
+      id,
+      eventsource: 'encrypt',
+      type: 'progress',
+      error: 'encryption error, file too big?'
+    })
+  }
+
 }
 
 const fileheader = [

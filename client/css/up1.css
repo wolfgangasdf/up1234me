@@ -77,7 +77,6 @@ a {
   text-decoration: none;
   transition: all 400ms ease-out;
   vertical-align: middle;
-  white-space: nowrap;
 }
 .btn:not(:first-child):not(:last-child) {
   margin-left: 20px;

@@ -14,11 +14,11 @@ function init (view, content) {
   _.daysuntilexpiry = view.find('#daysuntilexpiry')
   _.filename = view.find('#downloaded_filename')
   _.deletebtn = view.find('#deletebtn')
-  _.dlbtn = view.find('#dlbtn')
+  _.savebtn = view.find('#savebtn')
   _.viewbtn = view.find('#inbrowserbtn')
 
   _.deletebtn.hide()
-  _.dlbtn.hide()
+  _.savebtn.hide()
   updown.download(content, progress.bind(this), downloaded.bind(this))
 }
 
@@ -57,7 +57,7 @@ function downloaded (fileinfo, data) {
     _.deletebtn.show().click(function () {
       $.get('/del?ident=' + data.ident, function (res) {
         $('#topbar').hide()
-        _.dlbtn.hide()
+        _.savebtn.hide()
         _.preview.hide()
         let msg = 'Deleted: ' + fi.Description
         if (res !== '') {
@@ -76,15 +76,15 @@ function downloaded (fileinfo, data) {
   const safeurl = URL.createObjectURL(safedecrypted)
 
   _.viewbtn.prop('href', safeurl)
-  _.dlbtn.show()
-  _.dlbtn.prop('href', url)
-  _.dlbtn.prop('download', fn)
+  _.savebtn.show()
+  _.savebtn.prop('href', url)
+  _.savebtn.prop('download', fn)
 
   if (association == 'image' || association == 'svg') {
     $('<img>').appendTo(_.preview).prop('src', url)
   } else if (config.downloadautomatically) {
-    _.dlbtn.click()
-    _.dlbtn.text('Download again')
+    _.savebtn.click()
+    _.savebtn.text('File has been saved to download folder, click here to save it again!')
   }
 }
 
@@ -93,7 +93,7 @@ function progress (e) {
     _.loading.text('Decrypting')
   } else if (e === 'error') {
     _.loading.text('File not found or corrupt')
-    _.dlbtn.hide()
+    _.savebtn.hide()
     _.viewbtn.hide()
   } else {
     let text = ''
