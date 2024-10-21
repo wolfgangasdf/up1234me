@@ -22,6 +22,26 @@ function deletefile (ident) {
   })
 }
 
+function set_expiry (ident, days) {
+  days = prompt("New expiry days:", days)
+  if (days != null) {
+    fetch('/admin/set_expiry?i=' + ident + "&days=" + days).then(function () {
+      updatefilelist()
+    }).catch(function (err) {
+      console.log('Set_expiry Error: ', err)
+    })
+  }
+}
+
+function toggle_viewercandelete (ident, b) {
+  if (b) b = false; else b = true
+  fetch('/admin/set_viewercandelete?i=' + ident + "&b=" + b).then(function () {
+    updatefilelist()
+  }).catch(function (err) {
+    console.log('Set_expiry Error: ', err)
+  })
+}
+
 // https://stackoverflow.com/a/18650828
 function formatBytes(a,b=2){if(!+a)return'0 Bytes';const c=0>b?0:b,d=Math.floor(Math.log(a)/Math.log(1024));return`${parseFloat((a/Math.pow(1024,d)).toFixed(c))} ${['Bytes','KB','MB','GB','TB','PB','EB','ZB','YB'][d]}`}
 
@@ -52,14 +72,16 @@ function updatefilelist () {
     for (const fii in data.FileList) {
       const fi = data.FileList[fii]
       const b = $('<button>').text('X').click(function () { deletefile(fi.FileName) })
+      const b_set_expiry = $('<button>').text(fi.Saved.Expirydays).click(function () { set_expiry(fi.FileName, fi.Saved.Expirydays) })
+      const b_toggle_viewercandelete = $('<button>').text(fi.Saved.Viewercandelete).click(function () { toggle_viewercandelete(fi.FileName, fi.Saved.Viewercandelete) })
       _.filelist.append($('<tr>')
         .append($('<td>').append(b))
         .append($('<td>').text(fi.Saved.Description))
         .append($('<td>').text(fi.FileDate))
         .append($('<td>').text(formatBytes(fi.FileSize, 0)))
-        .append($('<td>').text(fi.Saved.Expirydays))
+        .append($('<td>').append(b_set_expiry))
         .append($('<td>').text(fi.DaysUntilExpiry))
-        .append($('<td>').text(fi.Saved.Viewercandelete))
+        .append($('<td>').append(b_toggle_viewercandelete))
         .append($('<td>').text(fi.Saved.Downloadcount))
       )
     }

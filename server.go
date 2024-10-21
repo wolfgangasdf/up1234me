@@ -212,6 +212,38 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 		}
 		result, _ := json.Marshal(&SuccessMessage{})
 		w.Write(result)
+	} else if r.URL.Path == "/admin/set_expiry" { // set_expiry?i=ident&days=123
+		ident := r.URL.Query().Get("i")
+		days, err := strconv.Atoi(r.URL.Query().Get("days"))
+		if err != nil {
+			log.Println("set_expiry: Error parsing days: ", err)
+			return
+		}
+		log.Println("set_expiry: i=", ident, " days=", days)
+		identPath := filepath.Join(config.StoragePath, ident)
+		md, err := loadMetadata(identPath)
+		if err != nil {
+			log.Println("Error loading metadata: ", err)
+			return
+		}
+		md.Saved.Expirydays = days
+		savaMetadata(identPath, md.Saved)
+	} else if r.URL.Path == "/admin/set_viewercandelete" { // set_viewercandelete?i=ident&b=[true|false]
+		ident := r.URL.Query().Get("i")
+		b, err := strconv.ParseBool(r.URL.Query().Get("b"))
+		if err != nil {
+			log.Println("set_viewercandelete: Error parsing bool: ", err)
+			return
+		}
+		log.Println("set_viewercandelete: i=", ident, " b=", b)
+		identPath := filepath.Join(config.StoragePath, ident)
+		md, err := loadMetadata(identPath)
+		if err != nil {
+			log.Println("Error loading metadata: ", err)
+			return
+		}
+		md.Saved.Viewercandelete = b
+		savaMetadata(identPath, md.Saved)
 	}
 }
 
