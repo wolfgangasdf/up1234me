@@ -66,8 +66,8 @@ Used libraries
 * [go-bindata](https://github.com/go-bindata/go-bindata)
 * [sjcl](https://github.com/bitwiseshiftleft/sjcl) for crypto, js from Up1
 * [zeptojs](http://zeptojs.com/) as jquery
-* [go-http-auth](github.com/abbot/go-http-auth) for http basic auth
-
+* [go-http-auth](https://github.com/abbot/go-http-auth) for http basic auth
+* [qrcodejs](https://github.com/davidshimjs/qrcodejs) to show the qr code
 
 License
 ===

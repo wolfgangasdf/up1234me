@@ -183,6 +183,8 @@ function uploaded (data, response) {
     _.uploaddonea[0].href = secreturl
     _.uploaddonea[0].textContent = secreturl
 
+    new QRCode(document.getElementById("qrcode"), {text: secreturl, border: 4});
+
     navigator.clipboard.writeText(secreturl).then(function () { // need to wait until finished!
       console.log('Copying to clipboard was successful!')
     }, function (err) {
