@@ -194,6 +194,10 @@ a {
 {
   text-align: center;
 }
+#filelist tr td:nth-child(2)
+{
+  word-break:break-all;
+}
 #filelist tr td:nth-child(4),
 #filelist tr td:nth-child(5),
 #filelist tr td:nth-child(6),

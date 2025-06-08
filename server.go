@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"mime"
@@ -92,7 +91,7 @@ func validateConfig(config Config) {
 
 // serve files from go-bindata, print but ignore errors.
 func serveStaticFile(w http.ResponseWriter, pathBelowClient string) {
-	fmt.Println("serveFileAsset: " + pathBelowClient)
+	log.Println("serveFileAsset: " + pathBelowClient)
 	mimeType := mime.TypeByExtension(filepath.Ext(pathBelowClient))
 	b, err := Asset("client/" + pathBelowClient)
 	if err != nil {
@@ -104,7 +103,7 @@ func serveStaticFile(w http.ResponseWriter, pathBelowClient string) {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("index: url=" + r.URL.Path)
+	log.Println("index: url=" + r.URL.Path)
 	if r.URL.Path == "/" {
 		http.Redirect(w, r, "/upload", http.StatusMovedPermanently)
 	} else if r.URL.Path == "/config.js" {
@@ -116,14 +115,14 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 func uploadhtml(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	r := ar.Request
-	fmt.Println("uploadhtml: url=" + r.URL.Path)
+	log.Println("uploadhtml: url=" + r.URL.Path)
 	if r.URL.Path == "/upload" {
 		serveStaticFile(w, "upload.html")
 	}
 }
 
 func indexi(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("indexi: " + r.URL.Path)
+	log.Println("indexi: " + r.URL.Path)
 	identPath := filepath.Join(config.StoragePath, r.URL.Path[2:])
 	md, err := loadMetadata(identPath)
 	if err != nil {
@@ -134,6 +133,8 @@ func indexi(w http.ResponseWriter, r *http.Request) {
 	md.Saved.Downloadcount++
 	savaMetadata(identPath, md.Saved)
 	fi := FileInfo{Description: md.Saved.Description, DaysUntilExpiry: md.DaysUntilExpiry, ViewerCanDelete: md.Saved.Viewercandelete}
+	// this would log the IP of the downloader
+	// log.Println("indexi: desc=" + md.Saved.Description + ": ra=" + r.RemoteAddr + " fw=" + r.Header.Get("X-FORWARDED-FOR") + " ua=" + r.UserAgent())
 	jsonstring, err := json.Marshal(fi)
 	if err != nil {
 		log.Println(err)
@@ -144,7 +145,7 @@ func indexi(w http.ResponseWriter, r *http.Request) {
 }
 
 func download(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("download: url=" + r.URL.Path)
+	log.Println("download: url=" + r.URL.Path)
 	serveStaticFile(w, "download.html")
 }
 
@@ -174,7 +175,7 @@ type AdminFileList struct {
 
 func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 	r := ar.Request
-	fmt.Println("admin: url=" + r.URL.Path + " query=" + r.URL.RawQuery)
+	log.Println("admin: url=" + r.URL.Path + " query=" + r.URL.RawQuery)
 	if r.URL.Path == "/admin/" {
 		serveStaticFile(w, "admin.html")
 		return
@@ -248,7 +249,7 @@ func admin(w http.ResponseWriter, ar *auth.AuthenticatedRequest) {
 }
 
 func upload(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
-	fmt.Println("upload: url=" + r.Request.URL.Path)
+	log.Println("upload: url=" + r.Request.URL.Path)
 
 	// check TotalSize
 	start := time.Now()
@@ -360,7 +361,7 @@ func deletefile(identPath string, ignoreerrors bool) {
 }
 
 func delfile(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("delete: url=" + r.URL.Path)
+	log.Println("delete: url=" + r.URL.Path)
 	ident := r.FormValue("ident")
 
 	if len(ident) != 22 {
@@ -412,7 +413,7 @@ func loadMetadata(identPath string) (MetadataTemp, error) {
 func expire() {
 	time.Sleep(10 * time.Second)
 	for {
-		fmt.Println("expire: reading directory content...")
+		log.Println("expire: reading directory content...")
 		files, err := os.ReadDir(config.StoragePath)
 		if err != nil {
 			log.Println(err)
@@ -425,19 +426,20 @@ func expire() {
 					log.Println("expire: error loading metadata for " + identPath)
 				} else {
 					if md.DaysUntilExpiry == 0 {
-						fmt.Println("expire: delete " + identPath)
+						log.Println("expire: delete " + identPath)
 						deletefile(identPath, true)
 					}
 				}
 				time.Sleep(10 * time.Millisecond)
 			}
 		}
-		fmt.Println("expire: finished, sleeping...")
+		log.Println("expire: finished, sleeping...")
 		time.Sleep(24 * time.Hour)
 	}
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags)
 	configName := flag.String("config", "server.conf", "Configuration file")
 	flag.Parse()
 
